@@ -1,0 +1,35 @@
+<div class="recommendation-icon" id="recommendationIcon{{$ctrl.getId()}}" ng-if="$ctrl.shouldRender()">
+  <button id="recommendation-yes-{{$ctrl.getId()}}"
+          class="fa-stack fa-lg p-0 recommend recommendation-yes btn btn-link"
+          ng-if="$ctrl.isYes()"
+          popover-placement="auto top-right"
+          popover-animation="false"
+          uib-popover-template="::$ctrl.getPopupTemplate()"
+          popover-trigger="'outsideClick'"
+          popover-append-to-body="true"
+          sp-focus-changer="#recommendPopupTitle"
+          sp-focus-changer-click="true"
+          aria-label="{{'ui_recommendation_for' | spTranslate:$ctrl.getRecommendationFor() : ('ui_recommendations_yes' | spTranslate)}}. {{$ctrl.getRecommendationsReasons()}}">
+    <i class="fa fa-circle fa-stack-2x recommendation-yes-icon" role="presentation"></i>
+    <i class="fa fa-thumbs-up fa-stack-1x text-white" role="presentation"></i>
+  </button>
+
+  <button id="recommendation-no-{{$ctrl.getId()}}"
+          class="fa-stack fa-lg p-0 recommendation-no btn btn-link"
+          ng-if="$ctrl.isNo()"
+          popover-placement="auto top-right"
+          popover-animation="false"
+          uib-popover-template="::$ctrl.getPopupTemplate()"
+          popover-trigger="'outsideClick'"
+          popover-append-to-body="true"
+          sp-focus-changer="#recommendPopupTitle"
+          sp-focus-changer-click="true"
+          aria-label="{{'ui_recommendation_for' | spTranslate:$ctrl.getRecommendationFor() : ('ui_recommendations_no' | spTranslate)}}. {{$ctrl.getRecommendationsReasons()}}">
+    <i class="fa fa-circle fa-stack-2x text-danger recommendation-no-icon" role="presentation"></i>
+    <i class="fa fa-thumbs-down fa-stack-1x text-white" role="presentation"></i>
+  </button>
+
+  <div class="fa-stack fa-lg p-0" ng-if="$ctrl.isEmpty()">
+    <i class="fa fa-circle invisible" role="presentation"></i>
+  </div>
+</div>

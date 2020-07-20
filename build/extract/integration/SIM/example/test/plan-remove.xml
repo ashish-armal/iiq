@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ProvisioningPlan PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+
+A provisioning plan that will remove "Group B" from user "idm1".
+This is not the starting state, Group B will normally exist only
+if you have executed plan1.xml.
+
+-->
+<ProvisioningPlan nativeIdentity='idm1'>
+  <AccountRequest application='IDM/IdentityIQ Integration Demo' nativeIdentity='idm1' op='Modify'>
+    <AttributeRequest name='groups' op='Remove' value='Group B'/>
+  </AccountRequest>
+</ProvisioningPlan>

@@ -1,0 +1,46 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+-- Add Request.live column
+alter table identityiq.spt_request add live number(1,0) default 0;
+update identityiq.spt_request set live = 0;
+
+--
+-- IdentityAI recommendation schema changes
+--
+create table identityiq.spt_recommender_definition (
+  id varchar2(32 char) not null,
+  created number(19,0),
+  modified number(19,0),
+  name varchar2(128 char) not null,
+  attributes clob,
+  primary key (id)
+);
+
+alter table identityiq.spt_recommender_definition
+add constraint uk_ekuvq6a1uhwkxb7fofir077xv unique (name);
+
+create index identityiq.spt_recommender_definition_nam on identityiq.spt_recommender_definition (upper(name));
+alter table identityiq.spt_certification_item add recommend_value varchar2(100 char);
+
+create table identityiq.spt_module (
+  id varchar2(32 char) not null,
+  created number(19,0),
+  modified number(19,0),
+  name varchar2(128 char) not null,
+  description varchar2(512 char),
+  attributes clob,
+  primary key (id)
+);
+
+alter table identityiq.spt_module
+add constraint uk_bebq8nsflsucu90sph68pf43r unique (name);
+
+create index identityiq.spt_module_name on identityiq.spt_module (upper(name));
+
+update identityiq.spt_database_version set schema_version = '7.3-13' where name = 'main';
+
+commit;

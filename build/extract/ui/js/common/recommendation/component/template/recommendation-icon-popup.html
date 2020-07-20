@@ -1,0 +1,17 @@
+<div id="recommendationPopup-{{$ctrl.getId()}}">
+  <h4 class="font-bold" id="recommendPopupTitle-{{$ctrl.getId()}}">
+    <span ng-if="::$ctrl.isYes()">
+      <em class="fa fa-thumbs-up recommendation-yes-icon"></em>
+      {{'ui_recommendations_yes' | spTranslate}}
+    </span>
+    <span ng-if="::$ctrl.isNo()">
+      <em class="fa fa-thumbs-down text-danger"></em>
+      {{'ui_recommendations_no' | spTranslate}}
+    </span>
+  </h4>
+  <div class="padder reasons">
+    <ul class="m-l-sm">
+      <li ng-repeat="reason in ::$ctrl.getRecommendation().getReasons() track by $index">{{::reason}}</li>
+    </ul>
+  </div>
+</div>

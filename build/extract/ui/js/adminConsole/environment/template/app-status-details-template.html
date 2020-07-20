@@ -1,0 +1,39 @@
+<!--
+  ~ /* (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. */
+  -->
+<div id="appDetails" sp-loading-mask="appStatusCtrl.isLoading()" ng-show="appStatusCtrl.hasStatus()" style="display: flex; flex-direction: column;">
+
+    <!-- this top focusguard must appear before the first focusable element -->
+    <div class="focusguard" id="focusguard-top" tabindex="1" ng-focus="appStatusCtrl.setFocus('app-details-close-button')"></div>
+
+    <div class="row">
+        <div class="col-xs-6">
+            <h4 class="font-bold m-t-lg">{{appStatusCtrl.getTitle()}}</h4>
+        </div>
+        <div class="col-xs-6 text-right  m-t">
+            <button tabindex="2" id="app-details-close-button" aria-label="{{ 'ui_env_mon_app_detail_close_button_sr' | spTranslate }}" class="no-border inline flyout-trigger flyout-close" ng-click="appStatusCtrl.close()">
+                <i class="fa fa-times fa-lg"></i>
+            </button>
+        </div>
+    </div>
+    <!-- this bottom focusguard must appear after the last focusable element -->
+    <div class="focusguard" id="focusguard-bottom" tabindex="10" ng-focus="appStatusCtrl.setFocus('app-details-close-button')"></div>
+    <div ng-if="!appStatusCtrl.hasHostStatuses()" class="mh100">
+        <div class="row">
+            <div class="col-xs-10 text-center m-t">
+                <p>{{ 'ui_env_mon_detail_no_statuses' | spTranslate : appStatusCtrl.getTitle() }}</p>
+            </div>
+        </div>
+    </div>
+    <div ng-if="appStatusCtrl.hasHostStatuses()" class="flexContainer">
+        <div class="row">
+            <div class="item active">
+                <div class="m">
+                    <sp-data-table sp-items-func="appStatusCtrl.getHostStatus(startIdx, itemsPerPage, sortOrder)"
+                                   sp-table-config="appStatusCtrl.getDataTableConfig()">
+                    </sp-data-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

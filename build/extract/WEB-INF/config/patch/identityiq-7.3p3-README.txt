@@ -1,0 +1,1756 @@
+﻿README for 7.3p3
+Release Notes
+
+Release: 7.3
+Patch: 3
+
+Patch Deliverable:
+
+  identityiq-7.3p3.jar
+
+General Information:
+
+  IdentityIQ 7.3p3 is a patch for IdentityIQ 7.3.  All patches are cumulative,
+  so this patch includes all changes from previously released patches for
+  IdentityIQ 7.3.
+
+  If you are deploying IdentityIQ using a war file, you will need to
+  update the war file contents with those from this patch using the
+  following sample commands as a guide.  Place identityiq.war and
+  identityiq-7.3p3.jar in the current working directory and use the
+  following commands to update the war file:
+
+    mkdir iiq-7.3p3
+    cd iiq-7.3p3
+    jar xf ../identityiq-7.3p3.jar
+    jar uf ../identityiq.war *
+
+Installation Instructions:
+
+  1. Stop the application server (or the IdentityIQ application
+     if supported by the application server).
+
+  2. Un-jar the IdentityIQ patch in the IdentityIQ installation
+     directory.
+
+  3. Using a database client, execute the
+     upgrade_identityiq_tables-7.3p3 DDL script in WEB-INF/database
+     that is appropriate for your database type.  The database scripts are
+     cumulative, so you will receive errors for the schema changes that have
+     already been applied in previous patches.
+
+  4. Apply the patch by using a command line interface to execute the command
+     "iiq patch 7.3p3" (without the quotes) from the WEB-INF/bin directory.
+
+  5. Start the application server (or the IdentityIQ application if
+     supported by the application server).
+
+Upgrade Considerations:
+
+  - This patch contains fixes for a set of important security vulnerabilities.
+    - The first is a remote code execution vulnerability where a logged-in 
+    authenticated IdentityIQ user can cause undesired code to run on an 
+    IdentityIQ server due to deserialization of user-supplied JSON formatted 
+    input.
+    - The second is a vulnerability in the validation of SAML assertions 
+    where a valid and cryptographically signed SAML assertion can be modified   
+    and still considered valid for authentication. Exploiting this vulnerability 
+    requires successful authentication to a SAML Identity Provider trusted by 
+    IdentityIQ, but modifying the assertion prior to validation can allow 
+    impersonating another IdentityIQ user.
+    - The third is the potential for deciphering the encryption contained in
+    the network protocol that IdentityIQ components use to communicate with the
+    IQService. Exploiting this vulnerability requires the ability to capture
+    network traffic that is sent to the IQService.
+    - The fourth is the possibility that an unknown client can successfully
+    communicate with the Connector Gateway or Mainframe Connector outside of
+    the intended context.  Exploiting this vulnerability requires the ability
+    to capture network traffic that is sent to the Connector Gateway and/or
+    Mainframe Connector and an understanding of the proprietary communication
+    protocol used in communication with the Mainframe Connector via the
+    Connector Gateway.  To resolve this vulnerability, the IdentityIQ
+    application configuration must be changed for all applications that require
+    the Mainframe Connector.
+      • Use TLS as a communication protocol
+      • Add Client Authentication credentials to allow the Mainframe Connector
+        to authenticate the IdentityIQ Server.
+    The fix includes IdentityIQ changes, a new Connector Gateway package and a
+    fix for Mainframe Connectors.
+
+    As with all software vulnerabilities, we recommend that 
+    all customers apply this patch or the security fixes for IIQSR-148, 
+    IIQETN-7708, CONETN-2645, and CONETN-2732 along with
+    ConnectorGateway-Jul-2019 and Mainframe Connectors fix (FSD0116) available
+    in the Product Download Center on Compass as soon as possible.
+
+  - New Connectivity
+    - Workday Accounts Connector
+      - Manages Workday login accounts in Workday
+ 
+  - Enhanced Connectivity
+    - Active Directory Connector
+      - Supports aggregating and provisioning of 'DialPlan' atribute for a
+        Microsoft Skype Business user
+    - Azure Active Directory Connector
+      - Supports Office 365 groups
+    - Application Reconfiguration Enhancement
+      - Provides flexibility for the user to select schema values and
+        provisioning policies, even when the default has not been set
+    - Delimited File Connector
+      - Supports SFTP file transport protocol
+    - Oracle HRMS Connector
+      - Supports creating employee records in Oracle HRMS
+    - SAP Integration Module
+      - Supports SAP Fiori
+    - SAP HCM Connector
+      - Supports Central Person ID and Person ID external
+    - Web Services Connector
+      - Supports OAuth2's password grant type authentication
+      - Supports saving of updated refresh token received from target system
+        in the application
+    - Connector Gateway
+      - Enhanced and optimized TLS communication between IdentityIQ and
+        Connector Gateway
+      - Enhanced Security for Connector Gateway Host validation
+    - IQService
+      - The communication between IdentityIQ and IQService is now more secure
+        as it also supports TLS protocol and Client Authentication
+    - Okta Connector
+      - Supports partitioned account aggregation
+    - Duo Connector
+      - Supports minimum permission for Test Connection operation
+    - Cerner Connector
+      - Supports removing a username or disassociating an account
+        (Dormant Account support)
+    - Epic Connector
+      - Supports all types of userID's that provides the flexibility to select
+        UserID type
+      - Supports configurable UserId Type for web services administration
+    - Workday Connector
+      - Supports setting 'auto complete' to true while updating the contact
+        information
+    - Oracle Database Connector
+      - Supports connecting securely to Oracle Database
+      - Supports users and groups of Oracle 12c and Oracle 12cR2 for a container
+        database (CDB) at current container level
+    - SAP HANA Connector
+      - Supports aggregating terminated accounts
+    - SAP Portal Connector
+      - Enhanced with more secure integration library
+    - Connector Infrastructure
+      - IdentityIQ now supports separate classloader for Connectors. Custom
+        Connectors can utilize it to avoid the impact of IdentityIQ third-party
+	library upgrade.
+
+  - Deprecated Connectivity
+    - Jive Connector
+      - Deprecated in this release
+    - Microsoft Forefront Identity Manager Provisioning Intgraion Module (FIM PIM)
+      - Deprecated in this release
+ 
+  - End of Life Connectivity
+    - CyberArk Connector
+      - Removed in this release
+    - Microsoft Project Server Connector
+      - Removed in this release
+    - Novell Identity Manager Integration Module
+      - Removed in this release
+ 
+  - New Platform Support
+    - RACF LDAP Integration Module
+      - Supports IBM Tivoli Directory Server for z/OS 2.3 with SDBM LDAP backend
+    - ServiceNow Connector, Service Integration Module and Service Catalog
+      Integration
+      - Support ServiceNow Madrid and London release
+    - AirWatch Connector
+      - Supports version 9.5.0.16
+    - Solaris Connector
+      - Supports Solaris version 11.4 SPARC x86
+    - Epic Connector
+      - Supports EPIC 2019 release
+    - IQService
+      - Supports Microsoft Windows Server 2019
+    - Active Directory Connector
+      - Supports Microsoft Windows Server 2019
+      - Supports Microsoft Exchange Server 2019
+    - LDAP Connector
+      - Supports Microsoft ADAM version 2019
+    - Sybase Connector
+      - Supports HADR (High Availability Disaster Recovery) SAP ASE 16.0 SP03
+    - Microsoft SharePoint Server Connector
+      - Supports Microsoft SharePoint Server version 2019
+    - SAP GRC Integration Module
+      - Supports SAP GRC Access Control v12.0
+    - SAP Integraion Module
+      - Certified with SAP S/4HANA On-Premise version 1809
+
+  - Deprecated Platform Support
+    - ServiceNow Connector, Service Integration Module and Service Catalog
+      Integration
+      - No longer support the ServiceNow Jakarta release
+
+  - The JSONDeserializerFactory class has been deprecated. The "deserialize"
+    and "deserializeList" methods survive but will simply pass through to the
+    JsonHelper. The FlexJSON JSONDeserializer class has also been deprecated.
+    Any custom code or rules should be updated to eliminate any usages of the
+    FlexJSON JSONDeserializer class or the JSONDeserializerFactory class, and
+    instead use the JsonHelper class. All JSON inputs must be properly formed
+    with keys and string values surrounded by either single or double quotes.
+
+  - This release includes the ability to integrate with IdentityAI by providing
+    recommendations in both certifications and approvals.  In conjunction with
+    IdentityAI licensing, certifications and approvals have the ability to
+    display a recommended decision within the UI.  Using historical and group
+    analysis gathered from the organization, this feature will suggest a
+    decision for approves, revokes, and approvals next to the associated
+    options.  Users still have the option to make their own selections.
+
+  - The Oracle HRMS Connector now supports the creation of employee records in
+    Oracle HRMS. It is not the best practice to create records into HRMS via
+    automated means, however.  It is recommended to use this feature from an
+    efficiency perspective, in case, if Oracle HRMS is not the authoritative
+    source of the employee information as by design, Oracle EBS only accepts
+    person ID from its HRMS systems. This feature helps provide access to
+    employees to Oracle EBS modules based on appropriate permissions. The
+    feature also supports termination workflow during employee separation.
+    Aggregation performance has been improved in this release.
+
+  - The Mainframe Integration Modules now support the configuration of Pre
+    and Post Scripts return codes from Mainframe connectors. Add the below 
+    entries in the application configuration to support these changes:
+      <entry key="failWhenSkip" value="true/false"/> 
+      <entry key="failWhenWarn" value="true/false"/> 
+
+  - The IQService now offers enhanced security of the communication channel
+    between IdentityIQ and IQService using TLS and client authentication. All
+    transactions are now authenticated and encrypted. Applications of all
+    connectors that use IQService now have IQService User and IQService
+    Password fields which are mandatory if an IQService is configured to
+    communicate over TLS.
+
+  - When using the Active Directory connector, if "groupMembershipSearchDN" is
+    not configured, all the group memberships assocaited with respective
+    accounts will be fetched without being restricted to the user's search
+    scope defined by searchDNs.  If the desired behavior is to restrict the
+    group memberships for a given account then define the required scope under
+    "groupMembershipSearchDN". 
+ 
+  - In order to provide better support for upgrading from one plugin version to
+    another, there are new requirements enforced for plugin version number
+    formats. Plugin version numbers must be numeric, contain no alphabetic or
+    other characters, and separate the elements of the version number with
+    decimal points. Within each segment of the version number (the values
+    between the decimal points), the values are cast as integers, and leading
+    zeroes are trimmed. Hence "04" is interpreted as "4", as is "00004." A
+    segment containing any non-numeric values will be interpreted as 0. A
+    version of "1.004.alpha" will be parsed as "1.4.0" A version of "2.3.4a"
+    will be parsed as "2.3.0". The single exception is version numbers with
+    "-dev" appended to the end. This suffix causes version number validation to
+    bebypassed. See the "Plugin Upgrades" section of these release notes for
+    more information.  Attempted plugin upgrades to versions that do not
+    support this pattern may fail depending on how the version number is
+    interpreted.
+
+  - As of this release, snapshot isolation in SQL Server now is enabled by
+    default in the database upgrade scripts, which matches the database
+    creation scripts. The settings enabled are ALLOW_SNAPSHOT_ISOLATION and
+    READ_COMMITTED_SNAPSHOT.  This facilitates locking without excessive
+    blocking.  As a result of this change, administrators can expect an
+    increase in the utilization of the SQL Server tempdb resource.
+
+  - As of this release, OpenJDK 8 is now supported for Red Hat Enterprise
+    Linux and CentOS in combination with Tomcat or JBoss as the application
+    server. In addition, AdoptOpenJDK 8 is now supported for Windows
+    platforms.
+
+Upgrade Considerations - IdentityIQ 7.3 Patch 2:
+
+  - This patch contains fixes for a set of important security vulnerabilities.
+    These vulnerabilities allow a logged-in, authenticated user to gain
+    privileges beyond their assigned capabilities, including gaining
+    system administrator access.  The impact of these vulnerabilities is high,
+    but exploitation requires knowledge of IdentityIQ's web user interface
+    architecture.  Vertical privilege escalation is possible due to Java EL
+    evaluation of user-supplied input. Remote code execution is possible due to
+    Java deserialization using user-supplied input.  As with all software
+    vulnerabilities, we recommend that all customers apply this patch or the
+    e-fixes for IIQETN-7523 and IIQTC-118 available in the Product Download
+    Center on Compass as soon as possible.
+
+  - The IBM Tivoli Directory Server LDAP connector now supports an
+    'Unlock Account' feature. To enable the 'Unlock Account' feature for an
+    upgraded application, the following attributes must be added to the
+    application xml:
+      featuresString: UNLOCK
+      Attributes:
+	      <entry key="lockAttr" value="pwdAccountLockedTime"/>
+        <entry key="unlockAttr">
+          <value>
+            <List>
+              <String>pwdFailureTime</String>
+              <String>pwdAccountLockedTime</String>
+            </List>
+          </value>
+        </entry>    
+        
+  - The Workday connector now supports the Include_Additional_Jobs response
+    group.  To leverage this functionality, the following attributes must be
+    added to the application xml:
+      <entry key="Include_Additional_Jobs" value="true"/>
+      <entry key="version" value="30.1"/>
+    The existing attribute XPATHs will need to be updated according to version
+    30.1 of the API.
+ 
+  - The Box connector now supports Delta aggregation. To leverage this
+    functionality, the following atttibutes must be updated in the application
+    xml:
+      <entry key="deltaUserEventsList">
+        <value>
+          <List>
+            <String>DELETE_USER</String>
+            <String>NEW_USER</String>
+            <String>EDIT_USER</String>
+            <String>GROUP_ADD_USER</String>
+            <String>GROUP_REMOVE_USER</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="deltaGroupEventsList">
+        <value>
+          <List>
+            <String>GROUP_CREATION</String>
+            <String>GROUP_DELETION</String>
+            <String>GROUP_EDITED</String>
+          </List>
+        </value>
+      </entry>
+ 
+  - The SuccessFactors connector now has support for a Termination Date schema
+    attribute for Employees and Contingent workers. To leverage this
+    functionality in existing applications, add the schema attribute
+    "Termination Date" as a "String" type and a Description as "Populates the
+    Termination Date for Employees and WorkOrder End Date for Contingent
+    Workers."
+ 
+  - The RSA Authentication Manager connector now supports RSA Authentication
+    Manager version 8.3 and 8.4. For existing applications, ensure that the
+    entry key with the "rsaVersion" attribute does not exist in the
+    application xml when upgrading from any previous version. For example,
+    the below entry should be removed from application xml, if present: 
+      <entry key="rsaVersion" value="8"/> 
+ 
+  - Enhanced Connectivity
+    - Workday Connector
+      - Supports Organization Filter for aggregation
+      - Supports all the filters supported by Workday API version 30.1
+    - Duo Connector
+      - Supports aggregation and provisioning of administrator user in
+        the native Duo system
+      - Supports pagination parameters as per Duo guidelines
+    - Web Services Connector
+      - Supports multiple groups
+    - Box Connector
+      - Supports delta aggregation
+    - Salesforce Connector
+      - Supports public group as a group object
+    - Sybase Connector
+      - Supports aggregation of Password Expiration Interval, password_expired
+        and Expire Login attributes
+    - Oracle e-Business Suite Connector
+      - Supports network encryption and Data integrity feature for the Oracle
+        Database
+    - Oracle Database Connector
+      - Supports network encryption and Data integrity feature for the Oracle
+        Database
+    - GoogleApps Connector
+      - Supports fetching assigned roles to user during account delta
+        aggregation
+    - Microsoft SharePoint Server Connector
+      - Supports "Exclude Site Collections" filter
+    - Peoplesoft HCM Connector
+      - Supports DB2 as backend database
+    - SuccessFactors Connector
+      - Supports aggregation of termination date
+    - SAP Integration Module
+      - Supports SAP Business Warehouse Module
+      - Supports SAP Customer Relationship Management (CRM) Module
+      - Supports SAP Process Integration(PI) Module
+      - Supports SAP GRC Module
+      - Supports Aggregation of Authorization Objects
+    - AWS Connector
+      - Supports aggregation of password last used date and access key last
+        used details for each IAM User present within various AWS Accounts
+        in one AWS Organization
+ 
+  - New Platform Support
+    - Linux Connector
+      - Supports Red Hat Enterprise Linux version 7.6
+    - SCIM 1.1 Connector
+      - Supports for Facebook Workplace Managed system
+    - DB2 Connector
+      - Supports DB2 database installed on Linux
+    - LDAP Connector
+      - Supports Novell eDirectory (NetIQ) version 9.1
+    - RSA Authentication Manager Connector
+      - Supports RSA Authentication Manager version 8.3 and 8.4.
+    - HP Service Manager Integration
+      - Supports HP Service Manager 9.6 (now known as Micro Focus Service
+        Manager 9.6)
+    - SAP HANA connector
+      - Supports SAP HANA 2.0 SPS3
+ 
+  - Dropped Platform
+    - ServiceNow
+      - The ServiceNow Connector, ServiceNow Service Integration Module and
+        ServiceNow Service Catalog Integration no longer support the ServiceNow
+        Istanbul release
+
+Upgrade Considerations - IdentityIQ 7.3 Patch 1:
+
+  - This patch contains a fix for a set of important security vulnerabilities.
+    These vulnerabilities allow a logged-in, authenticated user to gain
+    privileges beyond their assigned capabilities, including gaining
+    system administrator access.  The impact of these vulnerabilities is high,
+    but exploitation requires knowledge of IdentityIQ's web user interface
+    architecture.  Vertical privilege escalation is possible due to
+    unauthorized modification of a role or unauthorized assignment of an
+    approval work item.  As with all software vulnerabilities, we recommend
+    that all customers apply this patch or the e-fix for IIQETN-7058 available
+    in the Product Download Center on Compass as soon as possible.
+
+  - Enhanced Connectivity
+    - SCIM 2.0 Connector
+      - Supports delta aggregation for accounts, groups, roles, and
+        entitlements
+    - Workday Connector
+      - Supports Workday API version 30.1
+    - Multiple Application Builder
+      - Supports creating or updating applications based on the Schema and
+        Provisioning Policies provided in the input csv file
+    - Okta Connector
+      - Supports log API instead of Event API for Delta Aggregation
+      - Supports search query parameter to filter the accounts
+    - Web Services Connector
+      - Supports Pass-Through Authentication
+      - Supports client certificate authentication
+      - Supports possible HTTP error codes and messages for identifying failed
+        operations
+    - ServiceNow Service Catalog API Integration
+      - Supports OAuth 2.0 authentication
+    - Seibel Connector
+      - Supports configurable employment status for enable and disable
+        operation
+    - EPIC Connector
+      - Supports WS-Security for common web services
+
+  - New Platform Support
+    - ServiceNow
+      - The ServiceNow Connector, ServiceNow SIM, and ServiceNow Launch in
+        Context (LIC) solutions support the ServiceNow London release
+    - Remedy SIM
+      - SailPoint BMC Remedy Service Desk Service Integration Module now
+        supports BMC Remedy AR System Server version 18.05
+
+  - The credential cycling (or AIM) integration for CyberArk now uses methods
+    that will utilize HASH as the authentication mechanism to ensure that they
+    are passed securely.  This requires that administrators run a CyberArk
+    utility to generate the hash. On Linux it would look similar to:
+      java -jar JavaAIMGetAppInfo.jar GetHash -AppExecutablesPattern=build/WEB-INF/lib/pam-credential.jar 
+    On Windows, the format is slightly different.  Just replace the second "-"
+    with "/" or:
+      java -jar JavaAIMGetAppInfo.jar GetHash /AppExecutablesPattern=build\WEB-INF\lib\pam-credential.jar
+
+Issues Resolved:
+
+  CONBOGIBEE-858
+    The RACF LDAP Integration Module now supports IBM Tivoli Directory
+    Server for z/OS 2.3 with SDBM LDAP backend 
+  CONCHENAB-2612
+    A separate classloader for connectors is now supported. Custom
+    connectors can utilize it to avoid the impact of library collisions and
+    version conflicts.
+  CONCHENAB-2613
+    The CyberArk connector has been removed with this patch. 
+  CONCHENAB-2619
+    The Novell Identity Manager Integration Module has been removed with this
+    patch.
+  CONCHENAB-2868
+    The Workday connector has a provision to execute aggregation using
+    multiple threads to enhance performance.
+  CONCHENAB-2893
+    The SCIM 2.0 connector now supports excluding the "meta" attribute while
+    creating account. 
+  CONCHENAB-2903
+    The SCIM 2.0 Connector now supports the 'meta' attribute on the
+    ServiceProviderConfig.
+  CONCHENAB-2904
+    The Workday connector now provides an option to set 'auto complete' to
+    true while updating contact information.
+  CONCHENAB-2909
+    The SCIM connector now supports connecting to an HTTP proxy server. 
+  CONCHENAB-2915
+    The SCIM 2.0 connector no longer throws a java.lang.NullPointerException
+    if the schema SCIMObject is null.
+  CONCHENAB-2922
+    The SCIM connector now supports identity correlation for primary
+    attributes.
+  CONCHENAB-2923
+    The AirWatch connector now supports version 9.5.0.16. 
+  CONCHENAB-2926
+    While running delta aggregation, the Workday connector now picks up the
+    correct worker record, even if a terminated record for the same worker may
+    be updated in the Workday system.
+  CONCHENAB-2948
+    Workday aggregation will now operate normally even if past termination
+    offset is provided in the application. 
+  CONCHENAB-2951
+    The Workday connector now successfully runs delta aggregation on the day
+    following a full aggregation.
+  CONCHENAB-2955
+    The SCIM 2.0 connector now supports TLS 1.2 while running on IBM
+    WebSphere.
+  CONCHENAB-2978
+    The SCIM 2.0 connector no longer includes ID attribute in HTTP PATCH
+    request. 
+  CONCHENAB-2999
+    Provisioning operations work as expected through the Cloud Gateway. 
+  CONCHENAB-3060
+    The Salesforce connector now fetches the query result in chunks while
+    fetching entitlements to avoid query timeouts. Also Public groups and
+    Permissions set can be skipped from account aggregation by removing them
+    from the schema.
+  CONCHENAB-3076
+    The Workday connector now populates FUTURE_ACTION, FUTURE_DATE, and
+    LAST_DAY_OF_WORK attributes for an employee when the last day of work is
+    before the termination date. 
+  CONCHENAB-3090
+    The SCIM 2.0 Connector now contains the group remove attribute for patch
+    JSON request.     
+  CONCHENAB-3093
+    The SCIM 2.0 connector now discovers only new schema attribute mappings
+    from the target system.
+  CONCHENAB-3117
+    The Workday connector no loger skips a worker record terminated on the
+    same day. 
+  CONCHENAB-3236
+    Application reconfiguration will now work for applications with no default
+    schema, such as DelimitedFile, Web Services, JDBC, etc., to allow for 
+    flexibility to select schema values and provisioning policies, even when
+    default has not been set.
+  CONELLIS-2028
+    The Solaris connector now supports Solaris version 11.4 SPARC x86.
+  CONELLIS-2171
+    The Duo connector now supports minimum permissions for the Test Connection
+    operation.
+  CONELLIS-2204
+    The Delimited File connector now has the ability to configure a
+    cryptographic algorithm when using SCP. 
+  CONELLIS-2242
+    The Delimited File connector now supports the SFTP file transport. 
+  CONETN-1986
+    The SAP HCM connector no longer fails the partitioned aggregation with
+    multiple threads.
+  CONETN-2259
+    The Active Directory connector no longer causes a ConnectorException when
+    previewing accounts for a multi-forested application and lists accounts
+    correctly. 
+  CONETN-2421
+    The Encrypted Data Synchronization Task will now encrypt nested secret 
+    attributes. 
+  CONETN-2423
+    The Active Directory connector no longer causes a NameNotFoundException
+    due to a collision of Active Directory objects when running delta
+    aggregation.
+  CONETN-2451
+    The LDAP Connector now supports aggregating and provisioning a custom
+    group member attribute for POSIX groups if it is configured as a group
+    schema. 
+  CONETN-2453
+    The Mainframe Integration Modules now support the configuration of Pre
+    and Post Scripts return codes from Mainframe connectors.
+  CONETN-2473
+    The SAP Direct Connector now provisions all roles present in a
+    provisioning plan with multiple attribute requests having "set"
+    operation.
+  CONETN-2492
+    The SAP HANA connector now correctly aggregates, and displays as
+    CATALOG_ROLES, the roles granted to a user per schema. 
+  CONETN-2515
+    The Google Apps connector now supports provisioning an account with 
+    multiple values for the "aliases" attribute. 
+  CONETN-2531
+    The Tivoli LDAP connector no longer causes InvalidNameException when
+    resetting a password for an account with special characters in the
+    Distinguished Name (DN) using self-service password reset. 
+  CONETN-2540
+    The Microsoft SQL Server connector no longer causes
+    InvalidConfigurationException when performing a test connection with
+    trailing spaces in the database names listed in the includeDatabases and
+    excludeDatabases fields. 
+  CONETN-2545
+    JDBC Connector no longer throws column not found exception when column
+    alias is used in the query provided.
+  CONETN-2550
+    The Active Directory Connector now logs JNDI exceptions as ERROR level 
+    entries instead of suppressing them, thereby enabling more efficient 
+    diagnosis.
+  CONETN-2552
+    The Delimited File Connector now executes the pre-iterate rule every time
+    an aggregation is run. 
+  CONETN-2556
+    In the Active Directory Connector, an aggregation task no longer throws a 
+    divide by zero arithmetic exception when preloading is enabled. 
+  CONETN-2559
+    The Oracle E-Business connector no longer adds a space to a description
+    field on a password change.
+  CONETN-2564
+    The LDAP Connector now considers the "Group Member Search Filter"
+    configuration when provisioning entitlements for an account. 
+  CONETN-2598
+    The Active Directory connector aggregates all accounts even when a 
+    communication exception occurs.
+  CONETN-2608
+    The Active Directory connector no longer times out the partitioned
+    aggregation when cache is enabled. 
+  CONETN-2622
+    For a Disable Active Directory account provisioning request, if
+    RegistrarPool attribute is empty or null, the user will be disabled in
+    Active Directory and Skype account will now be deleted. 
+  CONETN-2632
+    The Active Directory connector now supports provisioning "never" as a
+    value of the accountExpires attribute for an account. 
+  CONETN-2633
+    Password reset for serverless Active Directory application will reset the
+    password successfully when enforcedPasswordPolicy is set to true. 
+  CONETN-2644
+    The IQService will log INFO level debug messages when the trace level is 
+    set to 2.
+  CONETN-2645
+    The communication channel between Active Directory connector and IQService
+    is now more secure with the help of TLS and client authentication in
+    IQService.
+  CONETN-2658
+    The Workday connector now supports http and https based proxy servers.
+  CONETN-2732
+    Mainframe Integration components now offer enhanced security of the
+    communication channel between IdentityIQ, Connector Gateway, and Mainframe
+    Connectors using TLS and client authentication. Using this mechanism, all
+    transactions are now authenticated and encrypted. For more details refer to
+    Security Configurations for Mainframe Integration Components on Compass.
+  CONHELIX-1022
+    The Epic Connector now supports configurable UserId Type for
+    web services administration, providing higher flexibility during system
+    configuration.
+  CONHELIX-1064
+    The Cerner connector now supports the functionality of
+    removing a username or disassociating an account to better govern
+    identities
+  CONHELIX-1119
+    The EPIC Connector now supports the EPIC 2019 release
+  CONHELIX-1139
+    The Epic Healthcare Integration Module now aggregates
+    LinkedTemplates/SubLinkedTemplates correctly for Account group
+    aggregation.
+  CONHELIX-1148
+    The Epic connector now aggregates all account groups correctly and no
+    longer terminates account group aggregation abruptly. 
+  CONHELIX-1189
+    The Okta connector now supports partitioning account aggregation.
+  CONHELIX-1191
+    The EPIC connector now supports all types of userID's e.g. External,
+    Internal, SytemLogin etc.
+  CONHELIX-1208
+    The EPIC connector now uses appropriate headers to connect to EPIC 2019. 
+  CONHELIX-1218
+    The EPIC connector now supports provisioning for different UserID
+    types 
+  CONHOWRAH-1733
+    The IQService now can be installed on Microsoft Windows Server 2019 
+  CONHOWRAH-1736
+    The Active Directory connector now supports Microsoft Windows Server 2019.
+    It should be noted that the server OS has no changes in the Domain
+    Services (AD DS) functional levels beyond Microsoft Windows Server 2016.
+  CONHOWRAH-1773
+    When "groupMembershipSearchDN" is not configured, Active Directory
+    connector fetches all the group memberships associated with respective
+    account without restricting to user's search scope defined by
+    searchDN\searchDNs.
+  CONHOWRAH-1819
+    The IQService no longer shows the password of a service account in a log
+    entry when running in debug mode.
+  CONHOWRAH-1852
+    The Active Directory connector no longer fails when provisioning an
+    Integer value for "accountExpires" attribute. 
+  CONHOWRAH-1898
+    The Active Directory connector now supports Microsoft Exchange Server
+    version 2019. 
+  CONHOWRAH-1917
+    The Active Directory connector handles provisioning operations correctly
+    when spaces are present in distinguished name of the domains defined. 
+  CONHOWRAH-1925
+    Applications of all connectors that uses IQService now have two new 
+    fields, 'IQService User' and 'IQService Password'. These fields are 
+    mandatory for IQService configured to communicate over TLS.
+  CONHOWRAH-1945
+    For enhanced security of communication path between IdentityIQ and
+    IQService, applications configured to use IQService now have two new
+    fields 'IQService User' and 'IQService Password'. These fields are
+    mandatory if TLS communication between IdentityIQ and IQService is
+    configured. 
+  CONHOWRAH-2035
+    The Active Directory connector now supports aggregating and provisioning
+    of the 'DialPlan' attribute for Microsoft Lync\Skype for Business user. 
+  CONJUBILEE-99
+    The Web Services connector now supports the provisioning plan as an 
+    additional parameter in the WebServiceBeforeOperationRule. 
+  CONJUBILEE-115
+    The Web Services connector now allows parameters to be saved in the 
+    application via the Web Services Before and After operation rule. 
+  CONJUBILEE-150
+    The Web Services connector will now save updated refresh token received
+    from target system in the application.
+  CONJUBILEE-158
+    The Workday Accounts connector manages Workday accounts from the Workday
+    Central cloud module.
+  CONJUBILEE-170
+    The Web Services connector now supports client certificate authentication
+    in OAuth2 authentication. 
+  CONJUBILEE-184
+    The Web Services connector now passes an initialized 
+    processedResponseObject argument in the After Operation rule.
+  CONJUBILEE-186
+    The Cloud Gateway connector now respects CA certificates and hostname
+    verification during SSL. 
+  CONJUBILEE-204
+    The Web Services connector now supports OAuth2 client credentials
+    authentication with client Id and client secret in the request body. 
+  CONJUBILEE-220
+    The Web Services connector now supports standard cookies specification for
+    HTTP requests. 
+  CONJUBILEE-248
+    The Web Services connector now supports OAuth2's password grant type
+    authentication. 
+  CONMF-285
+    The ArcSight IT Security Information And Event Management Infrastructure 
+    Module no longer supports the HP ArcSight Enterprise Security Manager 
+    version 6.8 
+  CONMF-310
+    Enhanced and optimized TLS communication between IdentityIQ and Connector
+    Gateway.
+  CONMF-312
+    Enhanced security for Connector Gateway Host validation. 
+  CONNAMDANG-1472
+    The Oracle Database connector now has the ability to whitelist the
+    sub-roles and system privileges before executing the Revoke queries to
+    prevent SQL injection attacks. 
+  CONNAMDANG-1607
+    The Sybase connector now supports HADR (High Availability Disaster
+    Recovery) SAP ASE 16.0 SP03.
+  CONNAMDANG-1682
+    The AP HANA connector now has ability to fetch the terminated
+    accounts.
+  CONNAMDANG-1701
+    Support has been dropped for the following versions of Microsoft SQL
+    Server for the Microsoft SQL Server connector 
+      -  Microsoft SQL Server 2014   
+      -  Microsoft SQL Server 2012 
+  CONNAMDANG-1734
+    The DB2 connector has now been enhanced to not read the native identity
+    attribute from the user schema to prevent the SQL injection attacks. 
+  CONNAMDANG-1736
+    The DB2 connector has now been enhanced to whitelist the role name before
+    executing the DROP queries to prevent SQL injection attacks. 
+  CONNAMDANG-1738
+    The Sybase connector now supports configuring logical name to connect to
+    the Sybase server. 
+  CONNAMDANG-1743
+    The Sybase connector will now throw exceptions during aggregation in
+    certain erroneous situations which make continuing aggregation futile. 
+  CONNAMDANG-1747
+    The DB2 connector has now been enhanced to whitelist the permissions with
+    respect to the target objects before executing the Revoke queries to
+    prevent SQL injection attacks. 
+  CONNAMDANG-1751
+    The DB2 connector has now been enhanced to whitelist the permissions with
+    respect to the target objects before executing the Grant queries to
+    prevent SQL injection attacks. 
+  CONNAMDANG-1802
+    The Oracle HRMS Connector now supports the creation of employee records in
+    Oracle HRMS.
+  CONNAMDANG-1820
+    The Oracle Database connector now supports Secure connection for Oracle 
+    Database providing greater security for communication.
+  CONNAMDANG-1823
+    The Oracle DB connector now manages users and groups of Oracle 12c and 
+    12cR2 for container database (CDB) at current container level. There is no
+    change in support of Pluggable database (PDB) for Oracle 12c and 12cR2.
+  CONPAMBAN-1525
+    The SharePoint Online connector now has an application attribute named
+    'queryTimeout' with expected value in milliseconds which can be configured 
+    to avoid a timeout during aggregation when 'Manage All Site Collections'
+    option is selected. The default value is 60 seconds. 
+  CONPAMBAN-1681
+    The LDAP connector now supports version 2019 of ADAM. 
+  CONPAMBAN-1737
+    The Microsoft SharePoint Server connector now supports Microsoft SharePoint
+    Server version 2019 
+  CONPAMBAN-1816
+    RSA Authentication Manager connector now aggregates all accounts when 
+    Active Directory is configured as identity source. 
+  CONPAMBAN-1833
+    MS Project Server connector is not supported from this release. 
+    Applications already created for this connector on older versions of 
+    IdentityIQ are not expected to work after upgrading to this release. 
+  CONSEALINK-934
+    For the ServiceNow Service Desk integration Module, the "Choice action" on
+    transform map fields have been corrected on the Incident and Change
+    Request Update Sets.
+  CONSEALINK-997
+    The ServiceNow connector now supports ServiceNow Madrid release. 
+  CONSEALINK-998
+    The ServiceNow Service Integration Module now supports ServiceNow Madrid
+    release. 
+  CONSEALINK-1013    
+    The ServiceNow Service Catalog Integration module now supports
+    ServiceNow Madrid release.
+  CONSEALINK-1052
+    The Apache WSS4J library has been updated from version 1.5.12 to 1.6.19
+  CONSEALINK-1055
+    The following SailPoint integrations with ServiceNow are no longer supported
+    for the ServiceNow Jakarta release:
+      - ServiceNow Connector 
+      - ServiceNow Service Integration Module 
+      - ServiceNow Service Catalog Integration 
+      - ServiceNow Service Catalog API Integration 
+  CONUMSHIAN-293
+    In the SAP HR/HCM Connector, a partitioned aggregation will succeed even if
+    one thread has failed. 
+  CONUMSHIAN-2640
+    The SAP Integration Module now supports SAP Fiori.
+  CONUMSHIAN-2702
+    The SAP GRC Integration Module now supports SAP GRC Access Control
+    v12.0 
+  CONUMSHIAN-2740
+    The SAP Portal connector is now enhanced with a more secure integration 
+    library, which can be leveraged by deploying the sailpoint_ume.sda file.
+    To leverage this functionality Customer need to redeploy the 
+    sailpont_ume.sda File 
+  CONUMSHIAN-2751
+    For the Amazon Web Services (AWS) Connector, the dependent third-party 
+    library aws-java-sdk-bundle-1.11.354.jar (which bundles all AWS services) 
+    has been replaced with aws-sdk-module-1.0.jar. The new library bundles the
+    relevant AWS services (AWS SQS, AWS KMS, AWS S3, AWS Organization, 
+    AWS IAM, and AWS STS services) required by the connector. AWS SQS, 
+    AWS KMS, AWS S3, AWS Organization, AWS IAM, and AWS STS services) which 
+    connector requires. 
+  CONUMSHIAN-2766
+    SAP integration module is now certified with SAP S/4HANA On-Premise
+    version 1809 
+  CONUMSHIAN-2840
+    The SuccessFactors connector has been improved with more fine grained and
+    reduced permissions required for a service account to manage the
+    SuccessFactors Employees and Contingent workers.
+  IIQCB-2431
+    The French Canadian translation has been adjusted to correct some
+    incorrect text in a few places. 
+  IIQSR-17
+    Access Request item approval statuses now show correctly when the
+    approvalMode is "serial" and the approvalScheme is "manager, owner". 
+  IIQSR-89
+    Global Settings for 'Email Task Alerts' now correctly work for individual
+    tasks whose 'Email Task Alerts' setting is set to 'Disabled.' 
+  IIQSR-90
+    Special characters [=, +, -, @] can be used as leading characters in PDF,
+    CSF and UI reports, but are still escaped by a single quote to prevent
+    them from being used maliciously in CSV (Excel) reports. 
+  IIQSR-95
+    The Check Expired Work Items task now successfully expires escalated
+    approval work items when appropriate. 
+  IIQSR-109
+    If multiple role assignments and multiple accounts are configured on a
+    role that spans multiple applications, then if one or more accounts are
+    deleted natively, reprovisioning missing links for multiple role
+    assignments now creates all accounts instead of only one. 
+  IIQSR-130
+    Version numbers in plugins now have additional requirements and
+    restrictions.
+  IIQSR-131
+    The work item search in the work items page will now adhere to settings
+    configured in the SearchInputDefinitions, including the matchMode
+    property value of "ANYWHERE". 
+  IIQSR-132
+    Modifying an entitlement sunset date from the Identity Warehouse
+    entitlements tab now maintains the correct new date, rather than removing
+    the date. 
+  IIQSR-138
+    Role assignment filters now correctly handle boolean attributes. 
+  IIQSR-141
+    Reports created in multiserver environments are no longer prematurely
+    terminated when there is a race condition between the task management on
+    the servers.
+  IIQSR-144
+    Archived roles containing entitlements that no longer exist on their newer
+    versions are now viewable.
+  IIQSR-148
+    [SECURITY] Resolved an issue related to parsing of JSON objects. 
+  IIQSR-154
+    Work items which contain requests for roles or entitlements which do not
+    exist within LCM can now be correctly listed and displayed, rather than
+    displaying an error and not showing the approval. 
+  IIQSR-156
+    HTML <br> tags are now properly formatted in the description field of
+    Roles in Manage User Access screen.
+  IIQSR-157
+    Access Review Decision reports will return the correct results when
+    filtering by tags. 
+  IIQSR-164
+    The Data Exporter Task now correctly excludes negative role assignments 
+  IIQSR-165
+    WebService application provisioning failures no longer cause work items
+    created by Provisioning Transaction overrides to be unviewable. 
+  IIQSR-166
+    Credentials stored in a TargetSource, used in unstructured target
+    collection, will now always be encrypted, rather than possibly being
+    stored unencrypted during normal operation.
+  IIQSR-168
+    Date fields in custom self-service registration forms are now correctly
+    handled. 
+  IIQSR-170
+    Optimized the query used when viewing Work Item Archives to improve
+    performance on Oracle databases.
+  IIQTC-39
+    Setting the "localUpdate" property in a ProvisioningPlan will not cause a
+    concurrent modification error during plan compilation.
+  IIQTC-79
+    Editing an identity attribute and changing it to a null value now maintains
+    its attribute meta data, so that an edited identity attribute set to null
+    will be properly synchronized to its target.
+  IIQTC-108
+    Assigned roles with the same assignment id are now given separate identity
+    entitlements and displayed correctly in the View Identity Access page. 
+  IIQTC-119
+    Manual work items without a workflow case can now be archived, depending
+    on system configuration. 
+  IIQTC-137
+    Multivalued fields of type string with an AllowedValuesDefinition on a
+    custom form will not lose their display value on postBack. 
+  IIQTC-146
+    Rapidly launching the same workflow many times will not cause SQL errors
+    when the resulting task results have the same name.
+  IIQTC-147
+    Subtitles in sections for a custom form are now rendered, instead of being
+    invisible.
+  IIQTC-152
+    Snapshot isolation in SQL Server now is enabled by default in the database
+    upgrade scripts, which matches the database creation scripts..
+  IIQTC-153
+    When policy violations are encountered in Access Request, the previous
+    button now is disabled. 
+  IIQTC-157
+    [SECURITY] The OpenSAML libraries have been updated to mitigate a known
+    External Entity Injection vulnerability. 
+  IIQTC-158
+    Identity search functions in QuickLink populations now use 'starts with'
+    instead of 'equals'.
+  IIQTC-159
+    The Access Review Decision Report correctly filters on application and
+    managers.
+  IIQTC-172
+    [SECURITY] Multi-factor authentication is now triggered each time there is
+    a new session and SSO is configured. 
+  IIQTC-174
+    [SECURITY] The application configuration page will now prevent content
+    that can be exploited through an XSS vulnerability.
+  IIQTC-180
+    Modifying a ColumnConfig in the uiWorkitemListCardColumns entry in the
+    UIConfig that uses the created date will be reflected in the UI.  This
+    applies to the cards in My Work -> Work Items. 
+  IIQTC-185
+    Unicode characters are now properly displayed in user-input fields.
+  IIQTC-190
+    Saving the filter string in some cases using the source view in the
+    Advanced Analytics Advanced Search page will no longer cause an error. 
+  IIQTC-195
+    Form refresh buttons can now be used to pass-in data for post-processing. 
+  IIQTC-197
+    [SECURITY] A stored XSS vulnerability has been removed from a field in the
+    Application Configuration. 
+  IIQTC-205
+    Identity Refresh tasks now include an improved handling of concurrency
+    processes to avoid errors when the option "Number of Refresh Threads" is
+    used in task setup. 
+  IIQTC-212
+    Duplicate EntitlementGroup values will no longer appear in an identity's
+    XML after refresh. 
+  IIQTC-214
+    Corrected performance defect when viewing archived WorkItems list for
+    several thousand archives. 
+  IIQTC-220
+    Unassigned roles are no longer included in future Role Membership
+    certifications. 
+  IIQTC-221
+    [SECURITY] A user can no longer gain control of another identity by using
+    that identity's ID as a username. 
+  IIQTC-227
+    Full Text Index now omits non-requestable entitlements, thereby reducing
+    completion time.
+
+Issues Resolved - IdentityIQ 7.3 Patch 2:
+
+  CONBOGIBEE-859
+    The Jive connector now correctly aggregates all accounts from native
+    Jive system. 
+  CONCHENAB-2651
+    The Workday connector now supports aggregating records filtered by
+    organization.
+  CONCHENAB-2681
+    The Workday connector now aggregates only one record for a worker with
+    multiple records. 
+  CONCHENAB-2706
+    The Cloud Gateway now successfully connects to Active Directory forest. 
+  CONCHENAB-2765
+    The Workday connector now aggregates the most recent record of a worker
+    with multiple termination records. 
+  CONCHENAB-2771
+    The Workday connector now generates a new token after it is expired when
+    updating custom attributes. 
+  CONCHENAB-2849
+    The Workday connector now no longer causes NullPointerException for an
+    exception with an empty message. 
+  CONCHENAB-2850
+    The Dropbox connector now supports transferring files of a terminated
+    Dropbox account to the target Dropbox account. 
+  CONCHENAB-2853
+    The SCIM 2.0 connector now correctly parses Latin characters. 
+  CONCHENAB-2875
+    The Workday connector now no longer removes the termination date for an
+    account when aggregating it on the day of the termination. 
+  CONCHENAB-2880
+    The Okta connector now no longer fails the delta aggregation when
+    aggregating an empty attribute value from native Okta system. 
+  CONCHENAB-2912
+    The Workday connector now supports all the filters supported by version
+    30.1 of the Workday API. The filters must be added to the response group
+    filter in the upgraded application.
+  CONELLIS-1958
+    The Duo connector now uses okhttp-2.7.5.jar and okio-1.15.0.jar to address
+    the security vulnerability issues reported with previous version of these
+    libraries. 
+  CONELLIS-2068
+    The Duo connector now supports aggregation and provisioning of administrative
+    user in the native Duo system. 
+  CONELLIS-2075
+    The Linux connector now supports version 7.6 of Red Hat Enterprise Linux.
+  CONELLIS-2101
+    The Duo connector now supports pagination parameters as per guidelines
+    provided by Duo. 
+  CONETN-2127
+    The Active Directory connector now no longer causes the Identity Request to
+    remain in the "Verifying" state when provisioning a value of "accountExpires"
+    attribute.   
+  CONETN-2275
+    The LDAP connector now supports provisioning of a multivalued attribute as
+    an entitlement. 
+  CONETN-2328
+    The Active Directory connector now no longer causes NullPointerException
+    when running delta aggregation with missing or incorrect user cookies in
+    the application xml. Instead, it will trigger a full aggregation. 
+  CONETN-2343
+    The Active Directory connector now no longer fails the aggregation with
+     auto-partioninig and manageRecycleBin options enabled. 
+  CONETN-2351
+    The Novell eDirectory LDAP connector now supports provisioning of
+    entitlements with special characters in the Distinguished Name (DN). To
+    use this functionality, the following keys must be added to the
+    application xml: 
+        <entry key="charsToEscapeInDN" value=",+\"<>;"/> 
+        <entry key="charsToEscapeAtStartInDN" value="#"/> 
+        <entry key="charsToEscapeAtEndInDN" value=" "/> 
+        <entry key="charsToEscapeWhileProvisioning" value="/"/> 
+  CONETN-2400
+    The LDAP connector now no longer displays the IQService Host Warnings.
+    The warnings are now only displayed for AD and other connectors that
+    use IQService for provisioning and other transactions. 
+  CONETN-2410
+    The SAP GRC Integration now no longer rejects a request containing a
+    provisioning and deprovisioning operation for the same role. 
+  CONETN-2413
+    The Microsoft SQL Server connector now displays the date attributes in
+    correct format for all types of accounts. 
+  CONETN-2432
+    The SAP Connector now no longer displays incorrect warning messages when
+    provisioning or deprovisioning IT roles. 
+  CONETN-2433
+    The Oracle E-Business Suite connector now no longer fails with a
+    ConnectorException when disabling an account. 
+  CONETN-2441
+    The Active Directory connector now builds the Resource Object (RO) with
+    all the available attributes instead of just identity and display
+    attributes during Pass-through Authentication (PTA). 
+  CONETN-2447
+    The JDBC Connector now no longer causes "Missing IN or OUT parameter at
+    index:: 1" exception when performing test connection with a Stored
+    Procedure configured as the SQL Statement. 
+  CONETN-2452
+    The LDAP Connector now retries the aggregation in DEFAULT iterate mode
+    during network connectivity issues 
+  CONETN-2454
+    The IBM Tivoli Directory Server LDAP Connector now supports an 'Unlock
+    Account' feature.
+  CONETN-2459
+    The Active Directory connector now no longer causes ConnectorException:
+    ObjectNotFound error when provisioning an account or an account group
+    using a Load-Balanced URL in the Application Configuration. 
+  CONETN-2470
+    The SAP HR Connector now no longer causes a GeneralException when a
+    custom rule is configured for the Manager Relationship model. 
+  CONETN-2471
+    The LDAP connector now no longer causes an error when provisioning an
+    account or an account group using a Load-Balanced URL in the Application
+    Configuration. 
+  CONETN-2476
+    The ServiceNow connector now returns the display name or sysid for a
+    schema attribute based on the combination of sysparm_display_value and
+    useSysIdReference configuration parameters in the application. 
+  CONETN-2490
+    The IBM Lotus Domino connector now no longer causes
+    java.lang.NoClassDefFoundError when creating an application of that type
+    in JBoss 7. 
+  CONETN-2491
+    The Azure Active Directory connector now has enhanced logging for
+    connection issues in debug mode. 
+  CONETN-2498
+    The SAP Direct connector now deprovisions only to-be-deprovisioned roles. 
+  CONETN-2524
+    The Workday connector now successfully provisions an account with a blank
+    attribute value. 
+  CONETN-2529
+    The IBM Tivoli Directory Server LDAP Connector now no longer abruptly ends
+    the delta aggregation if the last account in a page is out of the scope of
+    the searchDN. 
+  CONETN-2539
+    The Active Directory connector now successfully aggregates the delta
+    account from child domain when delta aggregation is run with
+    iterateSearchFilter.
+  CONHELIX-982
+    The SCIM 1.1 connector now supports Facebook Workplace native system. 
+  CONHELIX-994
+    The Epic connector now supports AuditUserID for all provisioning
+    operations.
+  CONHELIX-1014
+    The Okta connector now supports both 'List Users with a Filter' and 'List
+    Users with a Search' in account management. 
+  CONHELIX-1040
+    The Okta connector now supports configuring performance tuning parameters
+    during aggregation. 
+  CONHELIX-1046
+    The Epic connector is now enhanced to successfully import Epic.xml and
+    PreferredLoginDepartments attribute now has a standard quote value. 
+  CONHELIX-1047
+    The Cerner connector now supports a "Sync Password" feature. 
+  CONHELIX-1054
+    The Cerner connector now supports provisioning of multiple Organization
+    groups via a business role. 
+  CONHELIX-1055
+    The Cerner connector now supports "Sync Password" feature with an
+    authoritative source.
+  CONJUBILEE-62
+    The Box Connector now supports delta aggregation. 
+  CONJUBILEE-71
+    The Box connector now supports delta aggregation. 
+  CONJUBILEE-133
+    The Salesforce connector now supports aggregating public group as a group
+    object due to which all public groups are now aggregated regardless of
+    their association to the accounts. 
+  CONJUBILEE-144
+    The Web Services connector now correctly retries provisioning an account. 
+  CONJUBILEE-153
+    The Web Services connector no longer causes an exception when resetting a
+    password with No Authentication type option. 
+  CONNAMDANG-1553
+    The DB2 connector now supports DB2 database installed on Linux. 
+  CONNAMDANG-1585
+    The Sybase connector now supports aggregating Password Expiration Interval,
+    password_expired and Expire Login attributes. The user can now provision
+    the Password Expiration Interval attribute as well. 
+  CONNAMDANG-1618
+    The Oracle connector and Oracle E-Business Suite connector now support
+    network encryption and Data integrity features for the Oracle Database
+    that is recommended by Oracle as a part of Standard Security feature.
+  CONNAMDANG-1657
+    The SAP HANA connector now supports SAP HANA 2.0 SPS3. 
+  CONPAMBAN-1306
+    The GoogleApps connector now supports account entitlements during account
+    delta aggregation. 
+  CONPAMBAN-1501
+    The Microsoft SharePoint Server connector now supports "Exclude Site
+    Collections" filter to define application scope. 
+  CONPAMBAN-1556
+    The LDAP connector now supports version 9.1 of Novell eDirectory (NetIQ).
+  CONPAMBAN-1607
+    The RSA Authentication Manager connector now supports version 8.4 of RSA
+    Authentication Manager.
+  CONSEALINK-873
+    The SailPoint HP Service Manager Service Integration Module now supports HP
+    Service Manager 9.6 (now known as Micro Focus Service Manager 9.6).
+  CONSEALINK-883
+    The ServiceNow connector now no longer fails delta aggregation with
+    "com.google.gson.JsonPrimitive cannot be cast to
+    com.google.gson.JsonObject" error. 
+  CONSEALINK-886
+    Target Permissions from Unstructured Target Collector now generate a
+    ServiceNow ticket when revoked from a certification when an application
+    is configured for Service Desk Integration module. 
+  CONSEALINK-893
+    The ServiceNow connector now uses all the cookies received from the
+    response for making subsequent requests for the session. 
+  CONSEALINK-900
+    The SailPoint ServiceNow Service Integration Module now correctly displays
+    ServiceNow ticket number in the access request when an Identity has
+    multiple accounts in ServiceNow. 
+  CONSEALINK-927
+    The following SailPoint integrations with ServiceNow are now no longer
+    supported for Istanbul release of ServiceNow:
+      - ServiceNow Connector
+      - ServiceNow Service Integration Module
+      - ServiceNow Service Catalog Integration
+      - ServiceNow Service Catalog API Integration 
+  CONUMSHIAN-2368
+    The SAP HR connector has an improved account aggregation performance,
+    especially in cases where multiple Action Type is configured.
+  CONUMSHIAN-2530
+    The AWS connector now aggregates "password last used date" and "access
+    key last used details" for every IAM User present within various AWS
+    Accounts inside an AWS Organization. 
+  IIQCB-2126
+    The French Canadian translation has been adjusted to correct some
+    incorrect text in a few places. 
+  IIQCB-2149
+    Thirteen languages in the message catalog were updated and 3 translations
+    were added, including Chinese Traditional, Danish, and Polish. 
+  IIQSR-49
+    Role assignments that create multiple accounts on the same Application now
+    provision correctly. 
+  IIQSR-61
+    If it exists, the application object is now available for use in field
+    validation rules in provisioning forms. 
+  IIQSR-62
+    If they exist, the link and application objects are now available for use
+    in field validation rules in provisioning forms. 
+  IIQSR-63
+    Violation pop-up window no longer incorrectly shows for a certification
+    item where the item's role was deleted since the certification was
+    created. 
+  IIQSR-66
+    The Entitlement Catalog now correctly handles by-type searches for PAM
+    entitlements 
+  IIQSR-68
+    Exceptions no longer happen in certifications when selecting "Details" for
+    roles with boolean entitlements or "Account Details" for accounts having
+    boolean entitlements. 
+  IIQSR-69
+    Identity searches in Advanced Analytics now consider application
+    selections when searching by link attributes. 
+  IIQSR-70
+    When multiple assignments of the same role are revoked in an access
+    review, they will all be removed rather than only one of the roles
+    associated with the accounts. 
+  IIQSR-76
+    To utilize some additional features, the library commons-beanutils.jar has
+    been upgraded from version 1.6 to version 1.9.3. 
+  IIQSR-77
+    [SECURITY] Resolved an XSS vulnerability in the Role Configuration page
+    and Scopes. 
+  IIQSR-79
+    Members of workgroups that have special characters in the workgroup name
+    (e.g. '{', '}', '/', ':')  can now open workitems assigned to that
+    workgroup. 
+  IIQSR-81
+    Partitioned aggregations across multiple task servers with a higher
+    maxThreads in the RequestDefinition no longer incorrectly stops some
+    partitions before they complete. 
+  IIQSR-104
+    An unstructured target using OAuth authentication in a PAM application can
+    now save a set of credentials separate from OAuth credentials defined in
+    the application configuration. 
+  IIQSR-107
+    Improved performance and responsiveness in the UI for users who belong to
+    hundreds of workgroups make access requests. 
+  IIQSR-108
+    Certification events triggered for an identity without accounts on an
+    included application no longer throw a NullPointerException when the
+    event is processed. 
+  IIQSR-119
+    A CSS file for custom branding now contains the correct formatting so that
+    the background color is not incorrectly overridden in some cases. 
+  IIQSR-123
+    Duplicate entries are no longer listed in manual remediation workitems. 
+  IIQTC-57
+    Search suggestions no longer include entries not allowed by a Quicklink
+    configuration. 
+  IIQTC-66
+    Duplicate items in bulk reassignment requests no longer cause errors. 
+  IIQTC-71
+    Application forms to change the password now display the correct fields. 
+  IIQTC-74
+    Plan arguments are now merged appropriately when existing attribute
+    assignments are present. 
+  IIQTC-85
+    [SECURITY] The error page is no longer susceptible to content injection. 
+  IIQTC-87
+    Rule-based role assignments modified and changed via role change
+    propagation no longer change source from rule to RolePropagator. 
+  IIQTC-88
+    A descriptive warning pop up is now displayed if the logged-in user has
+    insufficient permissions to remove access. 
+  IIQTC-94
+    The Perform Maintenance task no longer ignores
+    backgrounded-approval-completion items that have expiration dates. 
+  IIQTC-101
+    The filters available in the "Access request" feature have been revised to
+    apply the correct scoping. This action ensures that the user interface
+    (UI) will display the correct suggested resources. 
+  IIQTC-117
+    Role targets are no longer removed when updating the sunset date via an
+    LCM request.
+  IIQTC-118 
+    [SECURITY] Prevent possible vertical privilege escalation through internal
+    navigation manipulation.
+  IIQTC-137
+    Multivalued fields of type string with an AllowedValuesDefinition on a
+    custom form will not lose their display value on postBack.
+  IIQTC-144
+    Access request approval comments containing special characters are now
+    displayed properly in the UI. 
+  IIQTC-145
+    [SECURITY] Exposure to attacks using an encoded URL in specific scenarios
+    has been eliminated. 
+
+Issues Resolved - IdentityIQ 7.3 Patch 1:
+
+  CONCHENAB-2720
+    The SCIM 2.0 connector now supports delta aggregation for accounts,
+    groups, roles, and entitlements. 
+  CONCHENAB-2721
+    The Workday connector now supports Workday API version 30.1 
+  CONCHENAB-2751
+    The SailPoint BMC Remedy Service Desk Service Integration Module now
+    supports BMC Remedy AR System Server version 18.05. 
+  CONELLIS-1936
+    The Siebel Connector now supports configurable employment status for
+    enable and disable operations. 
+  CONELLIS-1963
+    The Solaris connector no longer displays the password in the Possible
+    Suggestion when password reset operation has failed. 
+  CONELLIS-1981
+    The Application builder is now able to create or update applications based
+    on provided Schema and Provisioning Policies in the input .csv file. 
+  CONETN-2327
+    After this upgrade, the IQService will access only IQService related keys
+    in the registry editor and so will install/uninstall successfully.
+  CONETN-2337
+    The SAP connector no longer causes "RfcGetException: Name or password is
+    incorrect (repeat logon)" when using After-provisioning rule to assign
+    an entitlement. 
+  CONETN-2345
+    The SAP Connector no longer throws "ArrayIndexOutOfBoundsException" when
+    aggregating accounts with a null Contractual User Type ID. 
+  CONETN-2385
+    The Azure AD Connector no longer supports creating user of type Guest. 
+  CONETN-2390
+    The Active Directory connector now has a flag
+    'skipIterateSearchFilterInPTA' that can be configured to skip or not skip
+    the iterate search filter configured for single search DN during
+    pass-through authentication (PTA) for a user. 
+  CONHELIX-938
+    The EPIC Connector now supports WS-Security for common web services. 
+  CONHELIX-947
+    The Okta connector now uses log API instead of Event API for delta
+    aggregation. 
+  CONHELIX-953
+    The Okta connector now uses search query parameter to filter the accounts.
+  CONJUBILEE-34
+    The Web Services connector now supports pass-through authentication.  
+  CONJUBILEE-38
+    The Web Services connector now supports client certificate authentication.
+  CONJUBILEE-55
+    The Web Services connector now handles the empty form entries while the
+    body type is selected as "Form Data". 
+  CONJUBILEE-85
+    The Web Services connector is now capable of excluding request headers from
+    the OAuth2 token generation requests. 
+  CONSEALINK-790
+    The SailPoint ServiceNow connector now supports the ServiceNow London
+    release.
+  CONSEALINK-791
+    The SailPoint Service Desk Integration Module now supports the ServiceNow
+    London release. 
+  CONSEALINK-792
+    The SailPoint ServiceNow Service Catalog API Integration and the SailPoint
+    ServiceNow Service Catalog Integration now support the London release of
+    ServiceNow.
+  CONSEALINK-801
+    The ServiceNow Service Integration Module update set no longer updates
+    objects which are out of the SailPoint application scope. 
+  CONSEALINK-804
+    The SailPoint ServiceNow Service Catalog API Integration now supports
+    OAuth 2.0 authentication. 
+  CONUMSHIAN-2348
+    In the AWS Connector (available with AWS Governance Module), two new
+    attributes, PolicyGroups and PolicyRoles, are now available in the default
+    schema of the Customer Managed Policy to allow viewing the list of groups
+    and roles that the customer managed policy is attached to. 
+  IIQCB-2057
+    The password policy setting description "Minimum number of character type
+    constraints to meet" has been modified to "The minimum number of
+    characters a password is allowed." to accurately reflect what that option
+    is doing. 
+  IIQCB-2091
+    The German translation has been updated to change the access review
+    signoff button text to "Bestätigen". 
+  IIQSR-39
+    Certification revocations for IT roles now work correctly when more than
+    one IT role share the same entitlement. 
+  IIQSR-42
+    A large amount of entitlements granted by a role during its sunrise are
+    now properly stored in the database to prevent an error when the sunrise
+    date is reached and the entitlements are provisioned. 
+  IIQSR-65
+    A targeted cert with  'Exclude Inactive Identities' and a backup certifier
+    (that has no other items in the access review) will correctly transition
+    from 'pending' to 'active.' Previously, these access reviews would stay
+    in 'pending' state forever, or show an error in the UI on systems running
+    MySQL database. 
+  IIQTC-6
+    The target attribute value of a required IT role shared by more than one
+    business role will now be correctly provisioned to the linked application
+    account during an Identity Refresh with Provision assignements selected. 
+  IIQTC-32
+    Profiles added to a role definition through the UI will correctly persist
+    special characters rather than them being escaped in the definition of
+    the role. 
+  IIQTC-36
+    SSO using SAML now correctly audits logins each time there a new session. 
+  IIQTC-37
+    Native change detection combined with delta aggregation will correctly
+    reflect the removal of an entitlement from the source application. 
+  IIQTC-41
+    Performance of the "Remove Access" tab of the "Manage Access" area has
+    been improved by factoring out some redundant database queries.
+  IIQTC-52
+    Certification details are provided when encountering an error during
+    generation, so that administrators can know which certification
+    generation failed. 
+  IIQTC-58
+    Account revocations are properly displayed only once per account in a
+    remediation work item, instead of multiple times. 
+  IIQTC-59
+    [SECURITY] Users are now prevented from editing a page in the UI to allow
+    unauthorized forwarding of an approval work item. 
+  IIQTC-61
+    The credential cycling (or AIM) integration for CyberArk now uses methods
+    that will utilize HASH as the authentication mechanism to ensure that
+    they are passed securely.
+  IIQTC-63
+    Identities selected in previous quicklinks will be cleared when selecting
+    the next quicklink. 
+  IIQTC-64
+    [SECURITY] Users are now prevented from editing a role without
+    authorization by crafting a URL with specific values. 
+  IIQTC-67
+    The user interface for saving the SMTP server password will correctly save
+    if the password confirmation is correct, rather than always indicating an
+    unmatched password. 
+  IIQTC-73
+    [SECURITY] Prevent the possibility of entering a XSS exploit as an
+    administrator while configuring certain options in both the LCM
+    configuration page and the application configuration page. 
+
+Patch Contents:
+
+  WEB-INF/bin/win/IQService.zip
+  WEB-INF/classes-connectors
+  WEB-INF/config/Application-builder-linux.csv
+  WEB-INF/config/Application-builder-windows-local.csv
+  WEB-INF/config/patch/identityiq-7.3p3-objects.xml
+  WEB-INF/config/scimConfiguration.xml
+  WEB-INF/config/patch/identityiq-7.3p3-README.txt
+  WEB-INF/config/patch/identityiq-7.3p3.xml
+  WEB-INF/config/patch/identityiq-lcm-7.3p3-objects.xml
+  WEB-INF/config/patch/identityiq-lcm-7.3p3.xml
+  WEB-INF/database/dataExport/drop_data_export_tables.db2
+  WEB-INF/database/dataExport/drop_data_export_tables.mysql
+  WEB-INF/database/dataExport/drop_data_export_tables.oracle
+  WEB-INF/database/dataExport/drop_data_export_tables.sqlserver
+  WEB-INF/database/dataExport/templates/create_data_export_tables.db2
+  WEB-INF/database/dataExport/templates/create_data_export_tables.mysql
+  WEB-INF/database/dataExport/templates/create_data_export_tables.oracle
+  WEB-INF/database/dataExport/templates/create_data_export_tables.sqlserver
+  WEB-INF/database/dataExport/upgrade_data_export_tables-7.3p3.db2
+  WEB-INF/database/dataExport/upgrade_data_export_tables-7.3p3.mysql
+  WEB-INF/database/dataExport/upgrade_data_export_tables-7.3p3.oracle
+  WEB-INF/database/dataExport/upgrade_data_export_tables-7.3p3.sqlserver
+  WEB-INF/database/arcsightDataExport/templates/create_arcsight_data_export_tables.mysql
+  WEB-INF/database/arcsightDataExport/templates/create_arcsight_data_export_tables.db2
+  WEB-INF/database/arcsightDataExport/templates/create_arcsight_data_export_tables.oracle
+  WEB-INF/database/arcsightDataExport/templates/create_arcsight_data_export_tables.sqlserver
+  WEB-INF/database/upgrade_identityiq_tables-7.3p3.db2
+  WEB-INF/database/upgrade_identityiq_tables-7.3p3.mysql
+  WEB-INF/database/upgrade_identityiq_tables-7.3p3.oracle
+  WEB-INF/database/upgrade_identityiq_tables-7.3p3.sqlserver
+  WEB-INF/lib/bcpkix-jdk15on-1.56.jar
+  WEB-INF/lib/bcpkix-jdk15on-1.61.jar
+  WEB-INF/lib/bcprov-ext-jdk15on-156.jar
+  WEB-INF/lib/bcprov-ext-jdk15on-1.61.jar
+  WEB-INF/lib/bsh-2.1.8.jar
+  WEB-INF/lib/identityiq.jar
+  WEB-INF/lib/scim-server.jar
+  WEB-INF/lib/jersey-apache-connector-2.17.jar
+  WEB-INF/lib/jersey-apache-connector-2.22.2.jar
+  WEB-INF/lib/connector-bundle.jar
+  WEB-INF/lib/connector-bundle-identityiq.jar
+  WEB-INF/lib/pam-credential.jar
+  WEB-INF/lib/Human_ResourcesService.jar
+  WEB-INF/lib/IntegrationService.jar
+  WEB-INF/lib/IntegrationService24.1.jar
+  WEB-INF/lib/okhttp-2.7.5.jar
+  WEB-INF/lib/okio-1.15.0.jar
+  WEB-INF/lib/okhttp-2.0.0.jar
+  WEB-INF/lib/okio-1.0.1.jar
+  WEB-INF/lib/commons-beanutils.jar
+  WEB-INF/lib/am-client.jar
+  WEB-INF/lib/clu-common.jar
+  WEB-INF/lib/iScreen-mvel-2-0-0.jar
+  WEB-INF/lib/iScreen-ognl-2-0-0.jar
+  WEB-INF/lib/ognl-3.0.8.jar
+  WEB-INF/lib/rsa-ws-7.1.2.jar
+  WEB-INF/lib/rsa-ws-8.0.jar
+  WEB-INF/lib/joda-time-1.6.2.jar
+  WEB-INF/lib/opensaml-2.5.3.jar
+  WEB-INF/lib/openws-1.4.4.jar
+  WEB-INF/lib/xmltooling-1.3.4.jar
+  WEB-INF/lib/joda-time-2.8.1.jar
+  WEB-INF/lib/not-yet-commons-ssl-0.3.9.jar
+  WEB-INF/lib/opensaml-2.6.6.jar
+  WEB-INF/lib/openws-1.5.6.jar
+  WEB-INF/lib/xmltooling-1.4.6.jar
+  WEB-INF/lib/jackson-annotations-2.6.0.jar
+  WEB-INF/lib/jackson-core-2.6.7.jar
+  WEB-INF/lib/jackson-databind-2.6.7.1.jar
+  WEB-INF/lib/jackson-annotations-2.9.8.jar
+  WEB-INF/lib/jackson-core-2.9.8.jar
+  WEB-INF/lib/jackson-databind-2.9.8.jar
+  WEB-INF/lib/aws-java-sdk-bundle-1.11.354.jar
+  WEB-INF/lib/aws-sdk-modules-1.0.jar
+  WEB-INF/lib-connectors/
+  WEB-INF/weblogic.xml
+  doc/pdf/7_3_3_SailPoint_Direct_Connectors_Admin_and_Config_Guide.pdf
+  doc/pdf/7_3_3_SailPoint_Integration_Guide.pdf
+  ui/css/application.css
+  ui/css/theme.css
+  WEB-INF/classes/SAMLTokenCache.xml
+  META-INF/sailpoint.taglib.xml
+  WEB-INF/config/HPServiceManagerIntegrationConfigForChange.xml
+  WEB-INF/config/HPServiceManagerIntegrationConfigForIncident.xml
+  WEB-INF/config/HPServiceManagerIntegrationConfigForRequest.xml
+  WEB-INF/config/ServiceNowServiceIntegrationModule.xml
+  WEB-INF/config/applicationBuilderRule.xml
+  WEB-INF/config/connector/ACF2-Full.xml
+  WEB-INF/config/connector/AWS.xml
+  WEB-INF/config/connector/ActiveDirectory-Direct.xml
+  WEB-INF/config/connector/AzureADConnector.xml
+  WEB-INF/config/connector/Box.xml
+  WEB-INF/config/connector/CloudGateway.xml
+  WEB-INF/config/connector/CyberArk.xml
+  WEB-INF/config/connector/DB2WindowsServer-Direct.xml
+  WEB-INF/config/connector/DelimitedFile.xml
+  WEB-INF/config/connector/Duo.xml
+  WEB-INF/config/connector/EPIC.xml
+  WEB-INF/config/connector/GoToMeeting.xml
+  WEB-INF/config/connector/GoogleAppsDirect.xml
+  WEB-INF/config/connector/IBMDB2.xml
+  WEB-INF/config/connector/IBMTivoliDS-Direct.xml
+  WEB-INF/config/connector/JIVE.xml
+  WEB-INF/config/connector/MicrosoftForefrontIdentityManager.xml
+  WEB-INF/config/connector/MicrosoftSQLServer-Direct.xml
+  WEB-INF/config/connector/MicrosoftSharePointOnline.xml
+  WEB-INF/config/connector/NovelleDirectory-Direct.xml
+  WEB-INF/config/connector/Okta.xml
+  WEB-INF/config/connector/OracleApplicationsHRMS-Direct.xml
+  WEB-INF/config/connector/OracleDatabase-Direct.xml
+  WEB-INF/config/connector/RACF-Full.xml
+  WEB-INF/config/connector/SAP-Direct.xml
+  WEB-INF/config/connector/SAPHR_HCM.xml
+  WEB-INF/config/connector/Salesforce.xml
+  WEB-INF/config/connector/ServiceNow.xml
+  WEB-INF/config/connector/ServiceNowServiceDesk.xml
+  WEB-INF/config/connector/Siebel.xml
+  WEB-INF/config/connector/SuccessFactors.xml
+  WEB-INF/config/connector/Sybase-Direct.xml
+  WEB-INF/config/connector/WebServices.xml
+  WEB-INF/config/connector/Workday.xml
+  WEB-INF/config/connector/WorkdayAccounts.xml
+  WEB-INF/config/connectorRegistry.xml
+  WEB-INF/config/connectorRegistryDeprecated.xml
+  WEB-INF/config/examplerules.xml
+  WEB-INF/config/identityRequestWorkflowSubs.xml
+  WEB-INF/config/init-ai.xml
+  WEB-INF/config/init-lcm.xml
+  WEB-INF/config/init.xml
+  WEB-INF/config/jrxml/CertificationDetailEntitlementsSubReport.jrxml
+  WEB-INF/config/lcmReportTasks.xml
+  WEB-INF/config/lcmrules.xml
+  WEB-INF/config/lcmworkflows.xml
+  WEB-INF/config/reportForms.xml
+  WEB-INF/config/reportTasks.xml
+  WEB-INF/config/rules.xml
+  WEB-INF/config/scimConfiguration.xml
+  WEB-INF/config/sendEmailPostActionRule.xml
+  WEB-INF/config/tasks.xml
+  WEB-INF/faces-config.xml
+  WEB-INF/jboss-deployment-structure.xml
+  WEB-INF/weblogic.xml
+  approval/approvals.xhtml
+  define/applications/ADldapAttributesForm.xhtml
+  define/applications/AzureADConnector.xhtml
+  define/applications/BoxNetAttributesForm.xhtml
+  define/applications/CyberArk.xhtml
+  define/applications/DuoAttributesForm.xhtml
+  define/applications/EPICAttributesForm.xhtml
+  define/applications/LotusDomino.xhtml
+  define/applications/MicrosoftSharePointServer.xhtml
+  define/applications/NIDMAttributesForm.xhtml
+  define/applications/Office365.xhtml
+  define/applications/OktaAttributesForm.xhtml
+  define/applications/OracleAppsHRMSAttributesForm.xhtml
+  define/applications/OracleDBConnectorForm.xhtml
+  define/applications/OracleEBSAttributesForm.xhtml
+  define/applications/ProjectServerAttributesForm.xhtml
+  define/applications/RSAAttributesForm.xhtml
+  define/applications/SAPAttributesForm.xhtml
+  define/applications/SAPHANAAttributesForm.xhtml
+  define/applications/SharePointOnlineAttributesForm.xhtml
+  define/applications/SharePointRWAttributesForm.xhtml
+  define/applications/WebServicesAttributesForm.xhtml
+  define/applications/WorkdayAccountsForm.xhtml
+  define/applications/WorkdayForm.xhtml
+  define/applications/applicationSchemas.xhtml
+  define/applications/cibAttributesForm.xhtml
+  define/applications/clientCertificateAuthenticationSection.xhtml
+  define/applications/delimitedAttributesForm.xhtml
+  define/applications/delimitedAttributesInclude.xhtml
+  define/applications/discoverDomains.xhtml
+  define/applications/iqserviceconfig.xhtml
+  define/applications/oauth2AuthenticationSection.xhtml
+  define/applications/scim2AttributesFormInclude.xhtml
+  define/applications/scim2OAuth2AuthenticationSection.xhtml
+  define/applications/sharepointRWUnstructuredConfig.xhtml
+  define/applications/windowsEventCollectorConfig.xhtml
+  define/applications/windowsSharesUnstructuredConfig.xhtml
+  define/policy/sodConstraint.xhtml
+  define/policy/sodpolicy.xhtml
+  define/roles/modeler/ipopsDataSource.xhtml
+  exception.xhtml
+  external/registration.xhtml
+  identity/businessRoleAccountDetailsTabPanel.xhtml
+  manage/correlation/manualCorrelation.xhtml
+  monitor/scheduleCertifications/editCertificationBehavior.xhtml
+  monitor/tasks/novellApplicationGeneratorTask.xhtml
+  monitor/tasks/novellApplicationListJson.xhtml
+  scripts/sailpoint/MultiSuggest.js
+  scripts/sailpoint/SailPoint.js
+  scripts/sailpoint/Suggest.js
+  scripts/sailpoint/accountGroup.js
+  scripts/sailpoint/certification/AssignedRoleRemediationDialog.js
+  scripts/sailpoint/certification/MissingRequiredRolesDialog.js
+  scripts/sailpoint/certification/MitigationDialog.js
+  scripts/sailpoint/certification/RemediationDialog.js
+  scripts/sailpoint/component/ApplicationSchemaSelector.js
+  scripts/sailpoint/component/IdentityDetailPopup.js
+  scripts/sailpoint/component/RoleFilter.js
+  scripts/sailpoint/component/Wizard.js
+  scripts/sailpoint/form/ComboBox.js
+  scripts/sailpoint/form/FormPanel.js
+  scripts/sailpoint/form/HtmlEditor.js
+  scripts/sailpoint/form/ManagedAttributeValueCombo.js
+  scripts/sailpoint/form/MultiLanguageHtmlEditor.js
+  scripts/sailpoint/form/MultiSelect.js
+  scripts/sailpoint/form/MultiText.js
+  scripts/sailpoint/form/RadioGroup.js
+  scripts/sailpoint/form/editor/FormEditor.js
+  scripts/sailpoint/form/editor/FormItemTree.js
+  scripts/sailpoint/form/editor/plugin/FormItemDragDrop.js
+  scripts/sailpoint/grid/PagingGrid.js
+  scripts/sailpoint/grid/SortableGrid.js
+  scripts/sailpoint/grid/Utils.js
+  scripts/sailpoint/grid/baseGrid.js
+  scripts/sailpoint/tasks/novellApplicationGeneratorTask.js
+  scripts/sailpoint/templates/EntitlementsTemplate.js
+  scripts/sailpoint/web/analyze/accountGroupSearchPanel.js
+  scripts/sailpoint/web/analyze/analyze.js
+  scripts/sailpoint/web/analyze/filtersPage.js
+  scripts/sailpoint/web/analyze/identitySearchPanel.js
+  scripts/sailpoint/web/analyze/searchResultsGrid.js
+  scripts/sailpoint/web/dashboard/workItemGrid.js
+  scripts/sailpoint/web/define/ActivityCategoriesGrid.js
+  scripts/sailpoint/web/define/PoliciesGrid.js
+  scripts/sailpoint/web/define/applications/ActivityDataSourcesGrid.js
+  scripts/sailpoint/web/define/applications/ApplicationsGrid.js
+  scripts/sailpoint/web/define/applications/AttributeDefinitionSchema.js
+  scripts/sailpoint/web/define/applications/CompositeDefinitionPanel.js
+  scripts/sailpoint/web/define/applications/DelimitedPanel.js
+  scripts/sailpoint/web/define/applications/accountsGrid.js
+  scripts/sailpoint/web/define/groupGrid.js
+  scripts/sailpoint/web/define/modeler/automatedBFRMining.js
+  scripts/sailpoint/web/define/modeler/automatedDirectedMining.js
+  scripts/sailpoint/web/define/modeler/entitlementMiningWizard.js
+  scripts/sailpoint/web/define/modeler/roleMetrics.js
+  scripts/sailpoint/web/define/modeler/roleMiningPopulation.js
+  scripts/sailpoint/web/define/modeler/roleMiningResults.js
+  scripts/sailpoint/web/define/modeler/roleMiningTemplates.js
+  scripts/sailpoint/web/define/modeler/roleReadOnlyView.js
+  scripts/sailpoint/web/define/roles/roleMining/itRoleMiningSearchEntitlements.js
+  scripts/sailpoint/web/define/roles/roleMining/roleMiningPanel.js
+  scripts/sailpoint/web/define/workflow/WorkflowApprovalWindow.js
+  scripts/sailpoint/web/define/workflow/WorkflowDesigner.js
+  scripts/sailpoint/web/define/workflow/WorkflowEditor.js
+  scripts/sailpoint/web/define/workflow/WorkflowStepWindows.js
+  scripts/sailpoint/web/systemSetup/electronicSignatures.js
+  scripts/sailpoint/web/workitem/RemediationItemGrid.js
+  scripts/sailpoint/web/workitem/Workitem.js
+  scripts/validation.js
+  systemSetup/iaiConfig.xhtml
+  systemSetup/lcm/additionalOptions.xhtml
+  systemSetup/miscellaneous.xhtml
+  systemSetup/objectAttribute.xhtml
+  systemSetup/objectConfigCommon.xhtml
+  systemSetup/systemCompliance.xhtml
+  ui/500.xhtml
+  ui/accessRequest/addAccess.xhtml
+  ui/accessRequest/removeAccess.xhtml
+  ui/accessRequest/userAccessRequestSelf.xhtml
+  ui/js/adminConsole/environment/template/app-status-details-template.html
+  ui/js/adminConsole/environment/template/env-monitoring-modules-tab.html
+  ui/js/adminConsole/environment/template/exception-icon-popup.html
+  ui/js/adminConsole/environment/template/host-status-combo-template.html
+  ui/js/adminConsole/environment/template/module-status-details-template.html
+  ui/js/adminConsole/environment/template/monitoring.html
+  ui/js/approval/template/approval-item-directive.html
+  ui/js/approval/template/approval-recommendation-explanation-dialog.html
+  ui/js/certification/schedule/identity/template/identity-certification-schedule-additional-options.html
+  ui/js/certification/template/cert-recommendation-explanation-dialog.html
+  ui/js/certification/template/certification-action-column-template.html
+  ui/js/certification/template/certification.html
+  ui/js/common/recommendation/component/template/recommendation-icon-popup.html
+  ui/js/common/recommendation/component/template/recommendation-icon.html
+  ui/js/pam/template/pam-identity-suggest-item.html
+  ui/js/workitem/list/component/template/work-item-card.html
+  ui/js/workitem/template/common-work-item-list.html
+  ui/js/workitem/template/common-work-item.xhtml
+  workitem/workItemsContent.xhtml
+  ui/js/bundles/SailPointBundle.js
+  ui/js/bundles/SailPointBundleLibrary.js
+  ui/js/bundles/SailPointClassicBundle.js
+  WEB-INF/config/plugins/identityai-recommender-plugin.zip
+  ui/jspm.config.js
+

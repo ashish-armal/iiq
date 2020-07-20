@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ProvisioningPlan PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+
+A provisioning plan that will create a Sun IDM user.
+Password must be supplied and meet the policy.  the default
+policy is 4 characters.
+
+-->
+<ProvisioningPlan>
+  <AccountRequest application='IdentityManager' nativeIdentity='idm4' op='Create'>
+    <AttributeRequest name='firstname' op='Set' value='User'/>
+    <AttributeRequest name='lastname' op='Set' value='Number4'/>
+    <AttributeRequest name='password' op='Set' value='xyzzy'/>
+  </AccountRequest>
+</ProvisioningPlan>

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ProvisioningPlan PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+
+A provisioning plan that will create a Sun IDM user.
+
+-->
+<ProvisioningPlan>
+  <AccountRequest application='IdentityManager' nativeIdentity='idm4' op='Delete'>
+  </AccountRequest>
+</ProvisioningPlan>

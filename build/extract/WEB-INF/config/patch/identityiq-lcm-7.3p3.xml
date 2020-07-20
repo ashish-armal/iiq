@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- Initialization file for patch to IdentityIQ -->
+
+<sailpoint>
+
+    <!-- DO NOT REMOVE - THIS SHOULD BE IMPORTED FOR EVERY RELEASE. -->
+    <ImportAction name="include" value="WEB-INF/config/patch/identityiq-lcm-7.3p3-objects.xml" />
+
+</sailpoint>

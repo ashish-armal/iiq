@@ -1,0 +1,21 @@
+<!--
+  ~ /* (c) Copyright 2019 SailPoint Technologies, Inc., All Rights Reserved. */
+  -->
+<div class="row">
+  <div class="col-sm-1">
+    <i class="fa fa-lg" ng-class="{ 'fa-arrow-down' : hostStatusComboCtrl.isDown(), 'fa-arrow-up text-success' : !hostStatusComboCtrl.isDown()}"
+       aria-label="{{hostStatusComboCtrl.getStatusAriaLabelKey() | spTranslate}}"></i>
+  </div>
+  <div class="col-sm-1" ng-if="hostStatusComboCtrl.hasError()" >
+    <button id="hostStatusWarningButton-{{hostStatusComboCtrl.getId()}}"
+            class="fa-lg btn btn-link"
+            popover-placement="auto top-right"
+            popover-animation="false"
+            uib-popover-template="::hostStatusComboCtrl.getErrorPopupTemplate()"
+            popover-trigger="'outsideClick'"
+            popover-append-to-body="true"
+            aria-label="{{hostStatusComboCtrl.getExceptionMessage()}}">
+      <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>

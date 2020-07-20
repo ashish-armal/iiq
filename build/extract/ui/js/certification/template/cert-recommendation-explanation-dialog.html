@@ -1,0 +1,98 @@
+<div class="text-center cert-recommendation-explanation-dialog">
+  <div class="dialog-intro">
+    <p class="m-b-lg text-left text-m">
+      {{ 'ui_cert_rec_exp_dialog_intro' | spTranslate }}
+      <strong>{{ 'ui_approval_rec_exp_dialog_intro_emphasis' | spTranslate }}</strong>
+    </p>
+    <p class="text-m"><strong>{{ 'ui_approval_rec_exp_dialog_no_icon' | spTranslate }}</strong></p>
+  </div>
+  <table class="table text-left m-t-lg m-b-lg" role="table">
+    <thead>
+    <tr role="row">
+      <th id="decisions" class="text-center modal-th b-0" scope="col"><span>{{ 'cert_item_tbl_header_decision' | spTranslate }}</span></th>
+      <th id="recommenedations" class="text-center modal-th b-0" scope="col"><span>{{ 'ui_recommendations' | spTranslate }}</span>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr role="row">
+      <td class="text-center b-0" headers="decisions">
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-up fa" role="presentation"></i> {{'cert_action_approve' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-down fa" role="presentation"></i> {{'cert_action_remediate' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static">
+          <i class="fa fa-bars" role="presentation"></i>
+        </a>
+      </td>
+      <td class="b-0 text-center" headers="recommendations">
+        <span class="m-l-sm">
+          <div class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x yes" role="presentation"></i>
+            <i class="fa fa-thumbs-up fa-stack-1x text-white" role="presentation" aria-label="{{ 'ui_recommendations_yes' | spTranslate }}"></i>
+          </div>
+        </span>
+      </td>
+    </tr>
+    <tr class="b-b" role="row">
+      <td class="text-center m-b" headers="decisions">
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-up fa" role="presentation"></i> {{'cert_action_approve' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-down fa" role="presentation"></i> {{'cert_action_remediate' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static">
+          <i class="fa fa-bars" role="presentation"></i>
+        </a>
+      </td>
+      <td class="text-center" headers="recommendations">
+        <span class="m-l-sm">
+          <div class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x text-danger" role="presentation"></i>
+            <i class="fa fa-thumbs-down fa-stack-1x text-white" role="presentation" aria-label="{{ 'ui_recommendations_no' | spTranslate }}"></i>
+          </div>
+        </span>
+      </td>
+    </tr>
+    <tr class="b-b" role="row">
+      <td class="text-center m-b" headers="decisions">
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-up fa" role="presentation"></i> {{'cert_action_approve' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static m-r-xs">
+          <i class="fa-thumbs-down fa" role="presentation"></i> {{'cert_action_remediate' | spTranslate}}
+        </a>
+        <a class="btn btn-white btn-static">
+          <i class="fa fa-bars" role="presentation"></i>
+        </a>
+      </td>
+      <td class="text-center" headers="recommendations">
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <p class="m-t-lg m-b-lg"><em>{{'ui_approval_rec_exp_dialog_responsible' | spTranslate}}</em></p>
+
+  <div class="text-center m-t-lg">
+    <button type="button"
+            ng-click="dialogCtrl.closeDialog()"
+            id="certRecommendationDialogConfirmBtn"
+            class="btn btn-info font-bold">{{'ui_approval_rec_exp_dialog_close' | spTranslate}}</button>
+  </div>
+
+  <div class="form-group">
+    <div class="small m-b-lg">
+      <div class="checkbox">
+        <sp-checkbox sp-id="certRecommendationDialogDoNotShow"
+                     sp-is-checked="dialogCtrl.noShow"
+                     sp-on-click="dialogCtrl.toggleShowDialog()"
+                     sp-label="{{'ui_dont_show_again' | spTranslate}}">
+        </sp-checkbox>
+      </div>
+    </div>
+  </div>
+</div>

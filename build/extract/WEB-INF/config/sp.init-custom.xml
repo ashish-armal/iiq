@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='custom/Rule/Email_From_Rule.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/CertificationCloser/Source/TaskDefinition/TaskDefinition_CertificationCloser.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/CorrelationMigrator/Source/TaskDefinition/TaskDefinition_ManualCorrelationExporter.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/CorrelationMigrator/Source/TaskDefinition/TaskDefinition_ManualCorrelationImporter.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/GenericImporter/Source/TaskDefinition/TaskDef-GenericImporter.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/IIQ_Connector/Source/Configuration/IIQ_Application_Config.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/IdentityIQSummarizer/Source/TaskDefinition/IdentityIQ_Summarizer.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/LogiPlex_Connector/Source/Configuration/ConnectorRegistry-LogiPlexConnector.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/MockIntegrationExecutor/Source/IntegrationConfig/IntegrationConfig-MockIntegrationConfig.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/MultiThreadedBeanShellKit/Source/SP_BeanShell_MultiThreading_Framework_Rule.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/MultiThreadedBeanShellKit/Source/SP_BeanShell_MultiThreading_Framework_TaskDefinition.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/ReportExtractor/Source/SP_TaskDefinition_ReportExtractor.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/RuleRunnerTask/SP_RuleRunnerTask.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/ServerSpecificTaskLauncher/Source/ServiceDefinition/ServerSpecificTaskLauncher_ServiceDefinition.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/ServerSpecificTaskLauncher/Source/TaskDefinition/ServerSpecificTaskLauncher_TaskDefinition.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/WorkgroupMigrator/Source/TaskDefinition/TaskDefinition_WorkgroupExporter.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/WorkgroupMigrator/Source/TaskDefinition/TaskDefinition_WorkgroupImporter.xml'/>
+  <ImportAction name='include' value='custom/SSF_Tools/XMLExportTask/TaskDefinition_Export_XML.xml'/>
+  <ImportAction name='include' value='custom/SSP_Tools/Rules/Rule-Standalone-IIQDB-Performance-Test.xml'/>
+  <ImportAction name='include' value='custom/SSP_Tools/Rules/Rule-Standalone-Install-Sizing-Rule-with-Driver-Test.xml'/>
+  <ImportAction name='include' value='custom/SSP_Tools/Rules/Rule-Standalone-Report-Database-Row-Counts.xml'/>
+  <ImportAction name='include' value='custom/ServiceDefinition/SSB_PluginImporterService.xml'/>
+</sailpoint>

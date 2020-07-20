@@ -1,0 +1,39 @@
+<!-- (c) Copyright 2019 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<section class="container-fluid">
+    <sp-slider slider-id="{{ctrl.detailsSliderName}}">
+        <div sp-loading-mask="ctrl.getCurrentDetails()">
+            <sp-module-status-details module-status="ctrl.currentStatus"/>
+        </div>
+    </sp-slider>
+    <div class="col-xs-12">
+        <div class="m-t">
+            <sp-data-table sp-items-func="ctrl.getModules(startIdx, itemsPerPage, sortOrder)"
+                           sp-table-config="ctrl.getDataTableConfig()">
+                <sp-data-table-heading sp-position="left">
+                    <h4 class="m-t-xs m-b-xs">
+                        {{ 'ui_env_monitoring_modules' | spTranslate }}
+                    </h4>
+                </sp-data-table-heading>
+                <sp-data-table-heading sp-position="right" sp-priority="1">
+                    <div class="input-group input-s pull-right m-l-xs">
+                        <input id="appSearchText"
+                               type="text"
+                               class="form-control input-sm"
+                               ng-keypress="ctrl.onQueryKeyPress($event)"
+                               ng-model="ctrl.query"
+                               aria-label="{{ 'ui_env_mon_module_search_text_sr' | spTranslate }}" />
+                        <span class="input-group-btn">
+                            <button type="submit"
+                                    class="btn btn-sm btn-default btn-icon"
+                                    ng-click="ctrl.refresh()"
+                                    aria-label="{{ 'ui_env_mon_module_search_btn_sr' | spTranslate }}">
+                                <i class="fa fa-search text-white" role="presentation"></i>
+                            </button>
+                        </span>
+                    </div>
+                </sp-data-table-heading>
+            </sp-data-table>
+        </div>
+    </div>
+</section>

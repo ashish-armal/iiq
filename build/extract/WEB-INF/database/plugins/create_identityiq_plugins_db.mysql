@@ -1,0 +1,16 @@
+
+-- Note that we do not specify a COLLATE - this will default to utf8_general_ci,
+-- which causes queries to be case-insensitive.
+CREATE DATABASE IF NOT EXISTS identityiqPlugin CHARACTER SET utf8;
+
+nowarning; -- Ignore warnings from 5.7 suggesting use of newer ALTER USER.
+
+GRANT ALL PRIVILEGES ON identityiqPlugin.*
+    TO 'identityiqPlugin' IDENTIFIED BY 'identityiqPlugin';
+GRANT ALL PRIVILEGES ON identityiqPlugin.*
+    TO 'identityiqPlugin'@'%' IDENTIFIED BY 'identityiqPlugin';
+GRANT ALL PRIVILEGES ON identityiqPlugin.*
+    TO 'identityiqPlugin'@'localhost' IDENTIFIED BY 'identityiqPlugin';
+
+warnings; -- resume warnings
+

@@ -1,0 +1,191 @@
+<!-- Mobile View -->
+<section class="panel m-t-xs" ng-if="approvalItemCtrl.isMobile()">
+  <header class="panel-heading bg-light lter">
+    <div class="row">
+      <div class="col-xs-12">
+        <span class="description">
+          <b>{{ ::approvalItem.operation }}:</b>
+          {{ ::approvalItem.isAccountRequest() ? approvalItem.getAccountDisplayName()
+          : approvalItem.getDisplayValue() }}
+        </span>
+        <div class="pull-right">
+          <button id="btnDetails{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  class="btn btn-sm btn-white"
+                  ng-show="!approval.isCompleting()"
+                  ng-click="approvalItemCtrl.showItemDetails()">
+            <i class="fa fa-info-circle text-info" role="presentation"></i>
+            <span class="hidden-xs" aria-hidden="true">{{ 'ui_my_approvals_details' | spTranslate }}</span>
+            <span class="sr-only">{{ 'ui_my_approvals_item_details' | spTranslate }}</span>
+          </button>
+          <button id="btnSunriseSunset{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  ng-disabled="!approval.isEditable()"
+                  ng-click="approvalItemCtrl.showSunriseSunsetDialog()"
+                  ng-show="approvalItemCtrl.showDateColumn() && !approval.isCompleting()"
+                  class="btn btn-sm m-l-none"
+                  ng-class="{'btn-success': approvalItem.hasSunrise() || approvalItem.hasSunset(),
+                             'btn-white': !(approvalItem.hasSunrise() || approvalItem.hasSunset())}">
+            <i class="fa fa-calendar" role="presentation"></i>
+            <span class="sr-only">{{'ui_my_approvals_sunrise_button' | spTranslate}}</span>
+          </button>
+          <button id="btnComments{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  class="btn btn-sm"
+                  ng-click="approvalItemCtrl.showApprovalItemComments()"
+                  ng-class="{'btn-success': approvalItem.commentCount,
+                             'btn-white': !approvalItem.commentCount}"
+                  ng-show="!approval.isCompleting()">
+            <i class="fa fa-comment"
+               ng-class="{'text-info' : !approvalItem.commentCount}"
+               role="presentation"></i>
+            <span class="sr-only">{{ 'ui_my_approvals_item_comments' | spTranslate }}</span>
+            <span ng-show="approvalItem.commentCount > 0" class="hidden-xs">
+              {{ approvalItem.commentCount }}
+              <span class="sr-only">{{ 'ui_my_approvals_approval_after_count' | spTranslate }}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <section class="panel-body hidden-xs">
+    <sp-configurable-details ng-model="approvalItem" sp-col-configs="approvalItemCtrl.getColumnConfigs()">
+    </sp-configurable-details>
+  </section>
+  <footer class="panel-footer bg-light lter">
+    <div class="btn-group btn-group-justified" role="group" ng-show="!approval.isCompleting()">
+      <span class="btn-group-xs-only">
+        <button id="btnApprove{{::approvalItemCtrl.getUniquifier()}}"
+                ng-disabled="!approval.isEditable()"
+                ng-show="!approval.isCompleting()"
+                ng-class="{ 'btn-success active' : approvalItem.isApproved()}"
+                aria-pressed="{{approvalItem.isApproved()}}"
+                ng-click="approvalItemCtrl.approve()"
+                class="btn btn-sm btn-white"
+                role="button"
+                type="button">
+          <i class="fa fa-thumbs-up"
+             ng-class="{ 'text-success': !approvalItem.isApproved() }"
+             role="presentation"></i>
+          {{ 'ui_my_approvals_approve' | spTranslate }}
+        </button>
+      </span>
+      <span class="btn-group-xs-only">
+        <button id="btnReject{{::approvalItemCtrl.getUniquifier()}}"
+                ng-disabled="!approval.isEditable()"
+                ng-show="!approval.isCompleting()"
+                ng-class="{ 'btn-danger active': approvalItem.isRejected()}"
+                aria-pressed="{{approvalItem.isRejected()}}"
+                ng-click="approvalItemCtrl.reject()"
+                class="btn btn-sm btn-white"
+                role="button"
+                type="button">
+          <i class="fa fa-thumbs-down"
+             ng-class="{ 'text-danger': !approvalItem.isRejected() }"
+             role="presentation"></i>
+          {{ 'ui_my_approvals_deny' | spTranslate }}
+        </button>
+      </span>
+    </div>
+    <span class="loading" ng-show="approval.isCompleting()">
+      <i class="fa-spin fa fa-spinner"></i> {{ 'ui_saving' | spTranslate }}
+    </span>
+  </footer>
+</section>
+
+<!-- Desktop View -->
+<section class="panel m-t-xs" ng-if="!approvalItemCtrl.isMobile()">
+  <header class="panel-heading bg-light lter">
+    <div class="row">
+      <div class="col-xs-12">
+        <span class="description">
+          <b>{{ ::approvalItem.operation }}:</b>
+          {{ ::approvalItem.isAccountRequest() ? approvalItem.getAccountDisplayName()
+          : approvalItem.getDisplayValue() }}
+        </span>
+        <div class="pull-right">
+          <span class="loading" ng-show="approval.isCompleting()">
+              <i class="fa-spin fa fa-spinner"></i> {{ 'ui_saving' | spTranslate }}
+          </span>
+          <button id="btnDetails{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  aria-label="{{approvalItemCtrl.getAriaLabel('ui_my_approvals_item_details_sr')}}"
+                  class="btn btn-sm btn-white"
+                  ng-show="!approval.isCompleting()"
+                  ng-click="approvalItemCtrl.showItemDetails()">
+            <i class="fa fa-info-circle" role="presentation"></i>
+          </button>
+          <button id="btnSunriseSunset{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  aria-label="{{approvalItemCtrl.getAriaLabel('ui_my_approvals_item_edit_start_end_date_sr')}}"
+                  ng-disabled="!approval.isEditable()"
+                  ng-click="approvalItemCtrl.showSunriseSunsetDialog()"
+                  ng-show="approvalItemCtrl.showDateColumn() && !approval.isCompleting()"
+                  class="btn btn-sm m-l-none"
+                  ng-class="{'btn-success': approvalItem.hasSunrise() || approvalItem.hasSunset(),
+                             'btn-white': !(approvalItem.hasSunrise() || approvalItem.hasSunset())}">
+            <i class="fa fa-calendar" role="presentation"></i>
+          </button>
+          <button id="btnComments{{::approvalItemCtrl.getUniquifier()}}"
+                  type="button"
+                  role="button"
+                  class="btn btn-sm"
+                  aria-label="{{approvalItemCtrl.getAriaLabelComment()}}"
+                  ng-click="approvalItemCtrl.showApprovalItemComments()"
+                  ng-class="{'btn-success': approvalItem.commentCount,
+                             'btn-white': !approvalItem.commentCount}"
+                  ng-show="!approval.isCompleting()">
+            <i class="fa fa-comment"
+               role="presentation"></i>
+            <span ng-show="approvalItem.commentCount > 0" class="hidden-xs">
+              {{ approvalItem.commentCount }}
+            </span>
+          </button>
+          <button id="btnApprove{{::approvalItemCtrl.getUniquifier()}}"
+                  ng-disabled="!approval.isEditable()"
+                  ng-show="!approval.isCompleting()"
+                  ng-class="{ 'btn-success active' : approvalItem.isApproved()}"
+                  aria-label="{{approvalItemCtrl.getAriaLabelApprove()}}"
+                  aria-pressed="{{approvalItem.isApproved()}}"
+                  ng-click="approvalItemCtrl.approve()"
+                  class="btn btn-sm btn-white m-l-lg"
+                  role="button"
+                  type="button">
+            <i class="fa fa-thumbs-up"
+               ng-class="{ 'text-success': !approvalItem.isApproved() }"
+               role="presentation"></i>
+            {{ 'ui_my_approvals_approve' | spTranslate }}
+          </button>
+          <button id="btnReject{{::approvalItemCtrl.getUniquifier()}}"
+                  ng-disabled="!approval.isEditable()"
+                  ng-show="!approval.isCompleting()"
+                  ng-class="{ 'btn-danger active': approvalItem.isRejected()}"
+                  aria-label="{{approvalItemCtrl.getAriaLabelDeny()}}"
+                  aria-pressed="{{approvalItem.isRejected()}}"
+                  ng-click="approvalItemCtrl.reject()"
+                  class="btn btn-sm btn-white"
+                  role="button"
+                  type="button">
+            <i class="fa fa-thumbs-down"
+               ng-class="{ 'text-danger': !approvalItem.isRejected() }"
+               role="presentation"></i>
+            {{ 'ui_my_approvals_deny' | spTranslate }}
+          </button>
+          <sp-recommendation-icon id="approvalItemCtrl.getUniquifier()"
+                                  sp-recommendation="approvalItem.getRecommendation()"
+                                  sp-recommendation-for="approvalItemCtrl.getSrLabel()"></sp-recommendation-icon>
+        </div>
+      </div>
+    </div>
+  </header>
+  <section class="panel-body hidden-xs">
+    <sp-configurable-details ng-model="approvalItem" sp-col-configs="approvalItemCtrl.getColumnConfigs()" sp-show-empty-message="!approvalItem.hasDescription()">
+    </sp-configurable-details>
+  </section>
+</section>

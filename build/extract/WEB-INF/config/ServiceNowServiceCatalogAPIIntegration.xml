@@ -1,0 +1,447 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2018 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+  <!-- This flag enables the display and search-ability of the externalTicketId -->
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="lcmShowExternalTicketId" value="true"/>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+    <!--
+     Rule called when the default LCM Provisioning and updating tickets 
+     for ServiceNow as workflows go through thier lifecycles.
+    -->
+  <Rule language="beanshell" name='servicenow-ticket-plan-generator'>
+    <Signature>
+      <Inputs>
+        <Argument name="log">
+          <Description>
+            The log object associated with the SailPointContext.
+          </Description>
+        </Argument>
+        <Argument name="context">
+          <Description>
+            A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+          </Description>
+        </Argument>
+        <Argument name="wfc">
+          <Description>
+            The currently execution workflow context.
+          </Description>
+        </Argument>
+        <Argument name="project">
+          <Description>
+            The project that we are dealing with in the provisioning workflow.
+            This argument comes from the workflow context and is here for convenience.
+          </Description>
+        </Argument>
+        <Argument name="identityRequest">
+          <Description>
+            The object.IdentityRequest object that contains all of the current request information,
+            including approval and provisioning information depending on where in the process
+            we are being launched.
+            This argument comes from the workflow context and is here for convenience.
+          </Description>
+        </Argument>
+        <Argument name="appName">
+          <Description>
+            The name of the application that should handle the ticket management.
+          </Description>
+        </Argument>
+        <Argument name="application">
+          <Description>
+            The application object representing the application that should handle the ticket management.
+          </Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+
+    <Description>
+      Given the current workflow context, using mostly the identityRequest
+      object build a plan that should represent the ticket data that
+      needs to be pushed into the ServiceNow's Service Request Ticket.
+    </Description>
+
+    <Source>
+      <![CDATA[
+        import java.util.ArrayList;
+        import java.util.List;
+        import java.util.Map;
+        import java.util.HashMap;
+        import sailpoint.object.Application;
+        import sailpoint.object.IdentityRequest;
+        import sailpoint.object.IdentityRequest.CompletionStatus;
+        import sailpoint.object.IdentityRequest.ExecutionStatus;
+        import sailpoint.object.IdentityRequestItem;
+        import sailpoint.object.ProvisioningPlan;
+        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+        import sailpoint.object.ProvisioningPlan.ObjectRequest;
+        import sailpoint.object.ProvisioningPlan.ObjectOperation;
+        import sailpoint.tools.Util;
+        import sailpoint.object.WorkItem;
+        import sailpoint.object.WorkItem.State;
+
+        /*
+         *  Method to return particular Item information from Identity Request object
+         */
+        private ArrayList getItemsList(IdentityRequest ir, String comment, String action) {
+            ArrayList itemsList = new ArrayList();
+            List exItems = ir.getItems();
+
+            if (null != exItems && 0 != exItems.size()) {
+                for (IdentityRequestItem item : exItems) {
+                    // exclude items created by expansion
+                    if (null != item && !item.isExpansion()) {
+                        ProvisioningPlan plan = item.getProvisioningPlan();
+                        String trackingId = null;
+
+                        // Get the tracking id from target application IIQ
+                        if (plan != null && plan.getAccountRequests("IIQ") != null
+                            && plan.getAccountRequests("IIQ").size() >= 1)  {
+                            if (plan.getAccountRequests("IIQ").get(0).getAttributeRequests() !=null
+                                && plan.getAccountRequests("IIQ").get(0).getAttributeRequests().size() >=1) {
+                               trackingId = plan.getAccountRequests("IIQ").get(0).getAttributeRequests().get(0).get("ritmSysId");
+                            }
+                        }
+
+                        Map exMap = new HashMap();
+
+                        if (trackingId != null) {
+                            exMap.put("tracking_id", trackingId);
+                        }
+
+
+                        if (item.getApprovalState() != null) {
+                            String approvalState = getServiceNowState(item.getApprovalState().toString().trim(), "approvalStateMap");
+                            exMap.put("approval_state", approvalState);
+                        } else {
+                            // When Identity Request is canceled we do not get approval state
+                            // hence handled this special condition
+                            if (ir.isTerminated()) {
+                                String approvalState = getServiceNowState("Canceled", "approvalStateMap");
+                                exMap.put("approval_state", approvalState);
+                            }
+                        }
+
+                        if (item.getProvisioningState() != null)  {
+                            String provisioningState = getServiceNowState(item.getProvisioningState().toString().trim(), "provisioningStateMap");
+                            exMap.put("provisioning_state", provisioningState);
+                        }
+
+                        if (Util.nullSafeEq(action, "open")) {
+                            comment = "IdentityIQ Provisioning Request Started - Awaiting Approval";
+                        } else if (Util.nullSafeEq(action, "openNoApproval")) {
+                            comment = "IdentityIQ Provisioning Request Started - No Approval.";
+                        } else if (Util.nullSafeEq(action, "postProvisioning")) {
+                            comment = "IdentityIQ Provisioning Request Finishing.";
+                        } else if (Util.nullSafeEq(action, "postApproval")) {
+                            if (item.getApproverName() != null) {
+                                if (item.getApprovalState() != null && WorkItem.State.Finished.equals(item.getApprovalState())) {
+                                    comment = "Item is approved by '"+ item.getApproverName() + "'. IdentityIQ Performing Provisioning.";
+                                } else if (item.getApprovalState() != null && WorkItem.State.Rejected.equals(item.getApprovalState())) {
+                                    comment = "Approval for this item is rejected by '" + item.getApproverName() + "'.";
+                                }
+                            } else {
+                                comment = "IdentityIQ Performing Provisioning.";
+                            }
+                        }
+
+                        exMap.put("comments", comment);
+
+                        if ( null != exMap && ( 0 != exMap.size() ) ) {
+                              itemsList.add( exMap );
+                        }
+                    }
+                }
+            }
+
+            if ( null != itemsList && ( 0 != itemsList.size() ) ) {
+                return (itemsList);
+            }
+
+            return (null);
+        }
+
+
+        /*
+         * Add an ObjectRequest that will represent the ticket to the constructed plan,
+         * and return it. Consumer can populate the attribute request's as required.
+         */
+        private ObjectRequest initPlan(ProvisioningPlan plan, String action, IdentityRequest ir, Application application) {
+            ObjectRequest req = new ObjectRequest();
+
+            req.setType("ticket");
+            req.setApplication(application.getName());
+
+            if (action.startsWith("open")) {
+                String ticketId = wfc.getArguments().getString("ticketId");
+
+                // If action is Open and passed ticketId is not
+                // null, then do not create a new ticket, instead
+                // update the passed ticket.
+                if (Util.isNotNullOrEmpty(ticketId)) {
+                    req.setNativeIdentity(ticketId);
+                }
+
+                // always operation is modify as ticket is created from ServiceNow
+                req.setOp(ObjectOperation.Modify);
+            } else {
+                req.setOp(ObjectOperation.Modify);
+
+                // If action is other than Open, then make sure
+                // to take the ticketId only from IdentityRequest.
+                // Don't read the ticketId from workflow args.
+                if (ir != null) {
+                    req.setNativeIdentity(ir.getExternalTicketId());
+                }
+            }
+
+            // add the request to the plan
+            plan.addObjectRequest(req);
+
+            // Return request
+            return req;
+        }
+
+        /*
+         * Though action is open, this method creates Modify operation plan 
+         * Build out a plan that can be used by a ticketing system
+         * to update a ticket with enough information to understand
+         * what was requested.
+         */
+        private ProvisioningPlan buildOpenTicketPlan(String action, IdentityRequest ir, Application application) {
+            ProvisioningPlan ticketPlan = new ProvisioningPlan();
+            ObjectRequest req = initPlan(ticketPlan, action, ir, application);
+
+            req.add( new AttributeRequest("data", getDataInfo(ir, req, action, "requestStateMap")));
+
+            return ticketPlan;
+        }
+
+        /*
+         * Build data information map
+         */
+        private Map getDataInfo(IdentityRequest ir, ObjectRequest req, String action, String stateMap) {
+            Map dataMap = new HashMap();
+            dataMap.put( "sailpoint_id", ir.getName() );
+            dataMap.put( "ticket_number", req.getNativeIdentity());
+
+            String comments = "";
+
+            if (action.equals("complete")) {
+                String requestState = "Unknown State";
+                CompletionStatus completionStatus = ir.getCompletionStatus();
+                ExecutionStatus executionStatus= ir.getExecutionStatus();
+
+                if (completionStatus != null && executionStatus != null) {
+                    if (CompletionStatus.Success.equals(completionStatus) && ExecutionStatus.Completed.equals(executionStatus)) {
+                        requestState = getServiceNowState("complete", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request Completed.";
+                    } else if (CompletionStatus.Success.equals(completionStatus) && ExecutionStatus.Terminated.equals(executionStatus)) {
+                        requestState = getServiceNowState("completeTerminated", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request Cancelled.";
+                    } else if (CompletionStatus.Incomplete.equals(completionStatus) && ExecutionStatus.Completed.equals(executionStatus)) {
+                        requestState = getServiceNowState("completeIncomplete", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request - One or more items failed.";
+                    } else if (CompletionStatus.Failure.equals(completionStatus) && ExecutionStatus.Completed.equals(executionStatus)) {
+                        requestState = getServiceNowState("completeFailure", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request Failed.";
+                    } else if (CompletionStatus.Pending.equals(completionStatus) && ExecutionStatus.Verifying.equals(executionStatus)) {
+                        requestState = getServiceNowState("complete", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request Completed.";
+                    } else if (CompletionStatus.Incomplete.equals(completionStatus) && ExecutionStatus.Verifying.equals(executionStatus)) {
+                        requestState = getServiceNowState("completeIncomplete", "requestStateMap");
+                        comments = "IdentityIQ Provisioning Request - One or more items failed.";
+                    }
+                }
+
+                dataMap.put( "request_state", requestState);
+            } else {
+                String requestState = getServiceNowState(action, "requestStateMap");
+                dataMap.put( "request_state", requestState);
+            }
+
+            List itemsList = getItemsList(ir, comments, action);
+            if ( null != itemsList ) {
+                dataMap.put( "items", itemsList);
+            }
+
+            return dataMap;
+        }
+
+        /*
+         * Get respective ServiceNow status by scanning respective mapping in the application
+         */
+        private String getServiceNowState(String currentState, String currentMap) {
+            String state = "Unknown State";
+            Object obj = application.getAttributes().get(currentMap);
+
+            if (obj instanceof Map) {
+                Map _map = (Map)obj;
+                state = _map.get(currentState);
+            }
+
+            return state;
+        }
+
+
+        /*
+         * Post approval build a summary of the items with the decisions and
+         * add them to an existing ticket.
+         */
+        private ProvisioningPlan buildPostApprovalTicketPlan(String action, IdentityRequest ir, Application application) {
+            ProvisioningPlan ticketPlan = new ProvisioningPlan();
+
+            ObjectRequest req = initPlan(ticketPlan, action, ir, application);
+            req.add( new AttributeRequest("data", getDataInfo(ir, req, action, "requestStateMap")));
+
+            return ticketPlan;
+        }
+
+        /*
+         * Post provisioning build a summary of the items and the provisioning
+         * status for each of the items and add them to an existng
+         * ticket.
+         */
+        private ProvisioningPlan buildPostProvisioningTicketPlan(String action, IdentityRequest ir, Application application) {
+            ProvisioningPlan ticketPlan = new ProvisioningPlan();
+
+            ObjectRequest req = initPlan(ticketPlan, action, ir, application);
+            req.add( new AttributeRequest("data", getDataInfo(ir, req, action, "requestStateMap")));
+
+            return ticketPlan;
+        }
+
+        /*
+         * After the workflow has completed with or without error) summarize the
+         * overall request status.
+         */
+        private ProvisioningPlan buildCompleteProvisioningTicketPlan(String action, IdentityRequest ir, Application application) {
+            ProvisioningPlan ticketPlan = new ProvisioningPlan();
+
+            ObjectRequest req = initPlan(ticketPlan, action, ir, application);
+            req.add( new AttributeRequest("data", getDataInfo(ir, req, action, "requestStateMap")));
+
+            return ticketPlan;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Main
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ProvisioningPlan ticketPlan = null;
+
+        if (void == action || null == action) {
+            Map wArgs = workflow.getVariables();
+            action = wArgs.get("action");
+
+            if (null == action) {
+                throw new Exception("Action was null, unable to build ticket plan.");
+            }
+         }
+
+         if (void == identityRequest || null == identityRequest) {
+            if (null != identityRequestId) {
+                identityRequest = context.getObjectByName(IdentityRequest.class, identityRequestId);
+
+                if (null == identityRequest) {
+                    throw new Exception("Identity request was null, unable to build ticket plan.");
+                }
+            } else {
+                throw new Exception("identityRequestId was null, unable to build ticket plan.");
+            }
+        }
+
+        if ( void == wfc || null == wfc ) {
+            if ( null != wfcase ){
+                wfc = wfcase;
+            } else {
+                throw new Exception("workflow context was null, unable to build ticket plan.");
+            }
+        }
+
+        if (Util.nullSafeEq(action, "open") || Util.nullSafeEq(action, "openNoApproval")) {
+            ticketPlan = buildOpenTicketPlan(action, identityRequest, application);
+        } else if (Util.nullSafeEq(action, "postApproval")) {
+            ticketPlan = buildPostApprovalTicketPlan(action, identityRequest, application);
+        } else if (Util.nullSafeEq(action, "postProvisioning")) {
+            ticketPlan = buildPostProvisioningTicketPlan(action, identityRequest, application);
+        } else if (Util.nullSafeEq(action, "complete")) {
+            ticketPlan = buildCompleteProvisioningTicketPlan(action, identityRequest, application);
+        } else {
+            throw new Exception("Unhandled action " + action + "' passed into ticket generation rule. Plan could not be generated");
+        }
+
+        // System.out.println("ServiceNow ticket plan generation rule end.\n" + ticketPlan.toXml());
+
+        return ticketPlan;
+      ]]>
+    </Source>
+  </Rule>
+
+  <!-- Ticket Application -->
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="NO_AGGREGATION, PROVISIONING" name="servicenow-ticket-management-app" type="ServiceNow Service Catalog">
+    <Attributes>
+      <Map>
+        <entry key="connectorClass" value="openconnector.connector.servicecatalog.ServiceNowTicketConnector"/>
+        <entry key="ticketDataGenerationRule" value="servicenow-ticket-plan-generator"/>
+        <entry key="url" value="https://demo.service-now.com/api/x_sap_servcat_api/iam/update_ticket"/>
+        <entry key="username" value=""/>
+        <entry key="password" value=""/>
+        <entry key="requestStateMap">
+          <value>
+            <Map>
+              <entry key="complete" value="closed_complete"/>
+              <entry key="completeFailure" value="closed_incomplete"/>
+              <entry key="completeIncomplete" value="closed_incomplete"/>
+              <entry key="completeTerminated" value="closed_cancelled"/>
+              <entry key="open" value="requested"/>
+              <entry key="openNoApproval" value="in_process"/>
+              <entry key="postApproval" value="in_process"/>
+              <entry key="postProvisioning" value="in_process"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="approvalStateMap">
+          <value>
+            <Map>
+              <entry key="Canceled" value="rejected"/>
+              <entry key="Expired" value="rejected"/>
+              <entry key="Finished" value="approved"/>
+              <entry key="Pending" value="requested"/>
+              <entry key="Rejected" value="rejected"/>
+              <entry key="Returned" value="requested"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="provisioningStateMap">
+          <value>
+            <Map>
+              <entry key="Committed" value="Committed"/>
+              <entry key="Failed" value="Failed"/>
+              <entry key="Finished" value="Finished"/>
+              <entry key="Pending" value="Pending"/>
+              <entry key="Retry" value="Retry"/>
+              <entry key="Unverifiable" value="Unverifiable"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Schemas>
+      <Schema displayAttribute="servicenow_number" featuresString="PROVISIONING" identityAttribute="ticketId" nativeObjectType="ticket" objectType="ticket">
+        <AttributeDefinition name="result" type="string">
+          <Description>Result</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+  </Application>
+</sailpoint>

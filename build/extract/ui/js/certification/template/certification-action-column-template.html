@@ -1,0 +1,96 @@
+<div class="cert-action-column">
+  <div class="row">
+    <div class="col-xs-12" ng-class="{'col-sm-9 recommend-margin': actionColumnCtrl.showRecommendations()}">
+      <button ng-repeat="decision in actionColumnCtrl.getButtonDecisions() track by $index"
+              ng-click="actionColumnCtrl.makeDecision(decision)"
+              class="btn btn-white btn-sm icon-btn m-r-xs cert-action-{{ decision.getCssName() }}"
+              ng-class="{'cert-action-current-decision' : actionColumnCtrl.isCurrentDecision(decision),
+                'returned-item' : actionColumnCtrl.isReturnedItem()}"
+              ng-disabled="!actionColumnCtrl.isEnabled()"
+              aria-pressed="{{ actionColumnCtrl.isCurrentDecision(decision) }}"
+              aria-label="{{ decision.promptKey | spTranslate }} {{ actionColumnCtrl.getActionColumnAriaLabel() }}">
+        <i class="fa fa-lg" role="presentation"></i>
+        {{ decision.promptKey | spTranslate }}
+      </button>
+
+      <sp-certification-action ng-show="actionColumnCtrl.isCompleteTab() || actionColumnCtrl.isDelegatedItem()" sp-action="{{ actionColumnCtrl.getCurrentDecision().name }}">
+      </sp-certification-action>
+
+      <button class="btn btn-white btn-sm icon-btn dropdown-toggle {{ actionColumnCtrl.getMenuActionClass() }}"
+              data-toggle="dropdown"
+              ng-class="{'menu-action' : actionColumnCtrl.hasMenuAction() || actionColumnCtrl.isEdited()}"
+              dropdown-toggle=""
+              aria-label="{{ 'ui_cert_action_column_menu_button_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}"
+              aria-pressed="{{ actionColumnCtrl.hasMenuAction() || actionColumnCtrl.isEdited() }}">
+        <i class="fa fa-bars" role="presentation"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right" dropdown-menu="" role="menu">
+        <li ng-if="actionColumnCtrl.canViewDecision()" role="presentation">
+          <a href="" ng-click="actionColumnCtrl.viewDecision()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_view_decision_sr' | spTranslate:actionColumnCtrl.getDisplayName() }}">
+            {{ 'ui_cert_menu_view_decision' | spTranslate }}
+          </a>
+        </li>
+        <li ng-if="actionColumnCtrl.canEditDecision()" role="presentation"
+            ng-class="{'cert-action-current-decision' : actionColumnCtrl.isEdited()}"
+            class="cert-action-Edited" role="presentation">
+          <a href="" ng-click="actionColumnCtrl.editDecision()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_edit_decision_sr' | spTranslate:actionColumnCtrl.getDisplayName() }} {{ 'ui_selected' | spTranslate }}">
+            <i class="fa fa-lg" role="presentation" ng-if="actionColumnCtrl.isEdited()"></i>
+            {{ 'ui_cert_menu_edit_decision' | spTranslate }}
+          </a>
+        </li>
+        <li ng-repeat="decision in actionColumnCtrl.getMenuDecisions()"
+            ng-class="{'cert-action-current-decision' : actionColumnCtrl.isCurrentDecision(decision),
+                       'disabled': !actionColumnCtrl.isEnabled()}"
+            class="cert-action-{{decision.name}}" role="presentation">
+          <a href="" ng-click="!actionColumnCtrl.isEnabled() || actionColumnCtrl.makeDecision(decision)" role="menuitem">
+            <i class="fa fa-lg" role="presentation" ng-if="actionColumnCtrl.isCurrentDecision(decision) && !actionColumnCtrl.isEdited()"></i>
+            {{ decision.promptKey | spTranslate }}
+            <span class="sr-only">{{ actionColumnCtrl.getActionColumnAriaLabel() }}</span>
+            <span class="sr-only" ng-if="actionColumnCtrl.isCurrentDecision(decision)">{{ 'ui_selected' | spTranslate }}</span>
+          </a>
+        </li>
+        <li ng-if="actionColumnCtrl.getMenuDecisions().length" class="divider"></li>
+        <li ng-if="actionColumnCtrl.hasIdentity()" role="presentation" ng-class="{'disabled': !actionColumnCtrl.isEnabled()}">
+          <a href="" ng-click="!actionColumnCtrl.isEnabled() || actionColumnCtrl.showComment()" role="menuitem" aria-disabled="{{ !actionColumnCtrl.isEnabled() }}"
+             aria-label="{{ 'ui_cert_menu_comment_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}">
+            {{ 'ui_cert_menu_comment' | spTranslate }}
+          </a>
+        </li>
+        <li role="presentation">
+          <a href="" ng-click="actionColumnCtrl.showHistory()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_history_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}">
+            {{ 'ui_cert_menu_history' | spTranslate }}
+          </a>
+        </li>
+        <li ng-if="actionColumnCtrl.hasDetails()" role="presentation">
+          <a href="" ng-click="actionColumnCtrl.showDetails()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_details_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}">
+            {{ 'ui_cert_menu_details' | spTranslate }}
+          </a>
+        </li>
+        <li ng-if="actionColumnCtrl.hasAccountDetails()" role="presentation">
+          <a href="" ng-click="actionColumnCtrl.showAccountDetails()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_account_details_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}">
+            {{ 'ui_cert_menu_account_details' | spTranslate }}
+          </a>
+        </li>
+        <li ng-if="actionColumnCtrl.hasRoleDetails()" role="presentation">
+          <a href="" ng-click="actionColumnCtrl.showRoleDetails()" role="menuitem"
+             aria-label="{{ 'ui_cert_menu_role_details_sr' | spTranslate:(actionColumnCtrl.getActionColumnAriaLabel()) }}">
+            {{ 'ui_cert_menu_role_details' | spTranslate }}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-xs-3 recommendation hidden-xs" ng-if="actionColumnCtrl.showRecommendations()">
+      <sp-recommendation-icon id="actionColumnCtrl.item.id"
+                              sp-recommendation="actionColumnCtrl.item.getRecommendation()"
+                              sp-show-empty="actionColumnCtrl.showRecommendations()"
+                              sp-recommendation-for="actionColumnCtrl.getActionColumnAriaLabel()">
+      </sp-recommendation-icon>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,238 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Email_From_Rule">
+  <Source>
+    import sailpoint.object.*;
+  import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import java.util;
+Logger log = Logger.getLogger("sailpoint.services.bshdemo");
+
+// TODO: Remove this forced log level set before checking in this Rule.
+log.setLevel(Level.DEBUG);
+    
+		//String certDefId = entity.getCertification().getCertificationDefinitionId();
+      //  System.out.println("certDefId "+certDefId);
+        //System.out.println("context "+context);
+        //System.out.println("cd "+context.getObjectById(CertificationDefinition.class, "c0a801046cb91944816cba68c37100c8"));
+  
+  
+/*import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
+Logger log = Logger.getLogger("sailpoint.services.bshdemo");
+
+// TODO: Remove this forced log level set before checking in this Rule.
+log.setLevel(Level.DEBUG);*/
+  
+/*QueryOptions qo = new QueryOptions();
+		qo.addFilter(Filter.eq("application.name", "PAWS"));
+		Iterator i = context.search(ManagedAttribute.class, qo);
+		Iterator j = context.search(Identity.class, qo);
+		Identity id = null;
+		while (i.hasNext()) {
+			 id = (Identity)j.next();
+			
+		}
+		return id.getDisplayableName();
+/*log.debug("Hello logging world!");
+  
+  Identity id = context.getObject(Identity.class, "Emp1"); //theCertifiee id
+  System.out.println("desg "+id.getStringAttribute("jobTitle"));
+  System.out.println("state "+id.getStringAttribute("status"));
+  System.out.println("em "+id.getEmail());
+  
+return id.getAttribute("status");
+   
+  Application ap = context.getObjectByName(Application.class, "PAWS");
+		List link = new ArrayList();
+		link = iid.getLinks();
+  log.debug("link:: "+link);
+		log.debug("Is PAWS:: "+link.contains("PAWS"));
+
+  
+  //String certDefId = entity.getCertification().getCertificationDefinitionId();
+          CertificationDefinition cd = context.getObjectById(CertificationDefinition.class, "402881856d2dfc22016d2e4203f00005");
+          accessReviewer = cd.getOwner().getName();
+          Map cdAttr = new HashMap();
+          cdAttr = cd.getAttributes();
+          String certType = cdAttr.get("certificationType").toString();
+          System.out.println("certType "+certType);
+  
+  /*Identity id = context.getObjectByName(Identity.class, "Emp15");
+  System.out.println(id)
+  String e = id.getEmail();N
+  System.out.println("email "+e);
+  System.out.println("email "+(e == null));
+  if (e == null || e.isEmpty() || e.equals("")) {
+    System.out.println("email empty");
+  }*/
+  
+
+
+/*ArrayList emailReceipent = new ArrayList();
+		Identity identity = context.getObject(Identity.class, "Ashish");
+		//log.debug("Printing Identity full information:\n"+identity.toXml());
+		emailReceipent.add(identity.getEmail());
+		String EmailTemplateName = "Custom_Email";
+		try {
+			EmailTemplate emailTemplate = context.getObjectByName(EmailTemplate.class, EmailTemplateName);
+      log.debug("emailTemplate: "+emailTemplate);
+			if (emailTemplate != null) {
+				Map myargs = new HashMap();
+				myargs.put("Name", identity.getName());
+				myargs.put("FirstName",identity.getFirstname());
+				myargs.put("LastName", identity.getLastname());
+				EmailOptions ops = new EmailOptions(emailReceipent, myargs);
+        log.debug("ops: "+ops);
+				context.sendEmailNotification(emailTemplate, ops);
+				log.debug("email sent");
+			}
+		}
+		catch (Exception ex) {
+			System.out.println("Error in Email send operation : " + ex);
+		}
+  
+  
+  log.debug("=============================================");
+  
+  ArrayList emailReceipent = new ArrayList();
+  String certItemStatus = null;
+  String certifier = null;
+  String entValue = null;
+  
+		emailReceipent.add("ashpsky@gmail.com");
+		String EmailTemplateName = "Custom_Email";
+		try {
+			EmailTemplate emailTemplate = context.getObjectByName(EmailTemplate.class, EmailTemplateName);
+      //log.debug("emailTemplate: "+emailTemplate);
+      
+			if (emailTemplate != null) {
+        
+        String certGroupName = "Application Owner Certification [6/10/19 9:59:48 PM IST]";
+        CertificationGroup cg = context.getObjectByName(CertificationGroup.class, certGroupName);
+
+        if (null == cg) {
+           log.error("Could not find CertificationGroup named:" + certGroupName);
+           return;
+        }
+
+        CertificationDefinition cd = cg.getDefinition();
+        if (null != cd) {
+           //log.debug("CertificationDefinition: \n" + cd.toXml());
+        }
+        
+        QueryOptions qo = new QueryOptions();
+        qo.add( Filter.eq( "certificationGroups.id", cg.getId() ) );
+
+        Iterator it = context.search(Certification.class, qo);
+        while (it.hasNext()) {
+           Certification cert = (Certification) it.next();
+           String name = cert.getName();
+           certifier = cert.getCertifiers().get(0);
+           int totalEntities = cert.getTotalEntities();
+           log.debug("Cert: [" + name + "], totalEntities:" + totalEntities);
+
+          Iterator entityItr = cert.getEntities().iterator();
+          while (entityItr.hasNext()) {
+            CertificationEntity entity = (CertificationEntity) entityItr.next();
+            if (entity.getType() == CertificationEntity.Type.Identity) {
+              log.debug("Certified Identity Name = "+entity.getIdentity());
+            }
+
+            Iterator itemItr = entity.getItems().iterator();
+            while (itemItr.hasNext()) {
+
+              CertificationItem item = new CertificationItem();
+              item = (CertificationItem) itemItr.next();
+              entValue = item.getExceptionAttributeValue();
+              CertificationAction certAction = item.getAction();
+              if (certAction != null) {
+
+                certItemStatus = certAction.getStatus().toString();
+                log.debug("name: "+ entity.getIdentity());
+                log.debug("decision: "+ certItemStatus);
+                log.debug("entitlement: "+ entValue);
+                
+                
+                Map myargs = new HashMap();
+                myargs.put("name", entity.getIdentity());
+                myargs.put("decision", certItemStatus);
+                myargs.put("entitlement", entValue);
+                myargs.put("certifier", certifier);
+                log.debug("myargs:: "+myargs);
+                EmailOptions ops = new EmailOptions(emailReceipent, myargs);
+                log.debug("ops: "+ops);
+                context.sendEmailNotification(emailTemplate, ops);
+                log.debug("email sent");
+
+              }
+            }
+          }
+        }
+        
+			}
+		}
+		catch (Exception ex) {
+			System.out.println("Error in Email send operation : " + ex);
+		}
+  
+sailpoint.tools.Util.flushIterator(it);*/
+  log.debug("=========================================================================");
+  ArrayList emailReceipent = new ArrayList();
+  emailReceipent.add("ashpsky@gmail.com");
+  Certification cert = context.getObjectById(Certification.class, "402881866db1e0b9016db46cd1b6022d");
+		           String name = cert.getName();
+		           certifier = cert.getCertifiers().get(0);
+		           int totalEntities = cert.getTotalEntities();
+		           log.debug("Cert: [" + name + "], totalEntities:" + totalEntities);
+
+		          Iterator entityItr = cert.getEntities().iterator();
+		          while (entityItr.hasNext()) {
+		            CertificationEntity entity = (CertificationEntity) entityItr.next();
+		            List list = new ArrayList();
+		            log.debug("---------------------------------------------------");
+		            if (entity.getType() == CertificationEntity.Type.Identity) {
+		              log.debug("Certified Identity Name = "+entity.getIdentity());
+		            }
+								
+                Identity id = context.getObjectByName(Identity.class, entity.getIdentity());
+		            String IDM_User_ID = id.getStringAttribute("idm_id");
+                
+		            Iterator itemItr = entity.getItems().iterator();
+		            
+		            while (itemItr.hasNext()) {
+
+		              CertificationItem item = new CertificationItem();
+		              item = (CertificationItem) itemItr.next();
+		              entValue = item.getExceptionAttributeValue();
+		              CertificationAction certAction = item.getAction();
+		              if (certAction != null) {
+
+		                certItemStatus = certAction.getStatus().toString();
+		                
+		                if (!certItemStatus.equalsIgnoreCase("Approved")) {
+			                log.debug("name: "+ entity.getIdentity());
+			                log.debug("decision: "+ certItemStatus);
+			                log.debug("entitlement: "+ entValue);
+                      log.debug("IDM User ID: "+ IDM_User_ID);
+			                
+			                list.add(certifier +":"+ item.getTargetName() +":"+ entValue);
+			                Map myargs = new HashMap();
+			                myargs.put("name", entity.getIdentity());
+			                myargs.put("decision", certItemStatus);
+			                myargs.put("entitlement", entValue);
+			                myargs.put("certifier", certifier);
+			                //log.debug("myargs:: "+myargs);
+			                EmailOptions ops = new EmailOptions(emailReceipent, myargs);
+			                //context.sendEmailNotification(emailTemplate, ops);
+			                //log.debug("email sent");
+			                //log.debug("List:: "+list);
+		                }
+
+		              }
+		            }
+		        }
+  
+  </Source>
+</Rule>

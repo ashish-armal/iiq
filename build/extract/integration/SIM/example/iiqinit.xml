@@ -1,0 +1,402 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!--
+  SailPoint initialization file for IdentityIQ/IDM integration testing.
+
+  This file is not required for an IDM integration, but it is recommended
+  that you follow the testing procedure in any new deployment.  
+
+  The minimum you will need for an integration is an Application defined 
+  for the Sun IDM system, in this file this is named "Sun IDM".  
+  Then you will need to create suitable aggregation tasks for the 
+  IDM application.
+
+-->
+<sailpoint>
+
+<!--===============================================================
+
+  Application: IDM/IdentityIQ Integration Demo
+
+  Based on the stock JDBCConnector, expose a simple user and group
+  schema that must match IDM's TestAdapter.
+
+  Note that the name of the Application and all of the attribute
+  names in the user schema must match the IDM Resource name and
+  account attribute names.
+
+  UDPATE: We are now aggregating accounts through the IDM connector
+  so this application is no longer used for testing.  Keep it
+  around for awhile in case we want to test direct aggregation
+  with indirect provisioning.
+
+===================================================================-->
+
+<Application name='IDM/IdentityIQ Integration Demo - Local' 
+  connector="sailpoint.integration.idm.TestConnector" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="user" value="identityiq"/>
+      <entry key="password" value="identityiq"/>
+      <entry key="host" value="localhost"/>
+      <entry key="port" value="3306"/>
+      <entry key="jdbcDriverClass" value="com.mysql.jdbc.Driver"/>
+      <entry key="dbURL" value="jdbc:mysql://localhost/identityiq"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Admin"/>
+  </Owner>
+  <Schemas>
+    <!-- note that nativeObjectType is the base table name -->
+    <Schema displayAttribute="id" identityAttribute="id" 
+      nativeObjectType="idm_users" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="firstname" type="string"/>
+      <AttributeDefinition name="lastname" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="department" type="string"/>
+      <AttributeDefinition name="groups" entitlement="true" type="string" multiValued="true"/>
+    </Schema>
+  </Schemas>
+</Application>
+
+<!--===============================================================
+
+  Manager
+
+  To demo certification remediation we need to have a manager for the
+  identities we'll aggregate from the test application.  This could
+  be part of the application data, but we can also just make a non-application
+  identity and assign it with a rule in the aggregation task.
+
+===================================================================-->
+
+<Identity name='manager' password='manager' managerStatus="true">
+  <Capabilities>
+    <Reference class='Capability' name='SystemAdministrator'/>
+  </Capabilities>
+  <Attributes>
+    <Map>
+      <entry key="lastname" value="Manager"/>
+      <entry key="firstname" value="Mr."/>
+      <entry key="email" value="mr.manager@example.com"/>
+    </Map>
+  </Attributes>
+</Identity>
+
+<!--===============================================================
+
+  Application: Sun IDM
+
+  The new 5.2 connector supporting provisioning and multiplex aggregation.
+
+===================================================================-->
+
+<Application name="Sun IDM" 
+             connector="sailpoint.connector.SunIDMConnector"
+             type="Sun IDM Connector"
+             featuresString="PROVISIONING">
+  <Attributes>
+    <Map>
+      <entry key="user" value="Configurator"/>
+      <entry key="password" value="configurator"/>
+
+<!-- redirect the host to local
+      <entry key="rpcRouterURL" value="http://houseboat.test.sailpoint.com:8080/idm/servlet/rpcrouter2"/>
+-->
+      <entry key="rpcRouterURL" value="http://localhost:8080/idm/servlet/rpcrouter2"/>
+
+
+      <!-- Admin filtering was on for the original use case aggregating
+           just IDM users.  For a full agg, turn this off.
+      <entry key="includeOnlyAdmins" value="true"/>
+      -->
+
+<!--
+      <entry key="customCIQUser.listClass" value="customCIQUserList"/>
+      <entry key="customCIQAdminRole.listClass" value="customCIQAdminRoleList"/>
+-->
+
+      <!-- This is the option that causes the connector to behave like
+           a multiplexor and bring in linked accounts as well as the
+           IDM users.
+       -->
+      <entry key="includeResources" value="true"/>
+
+    </Map>
+  </Attributes>
+  <Schemas>
+    <Schema objectType="account"
+            identityAttribute="accountId"
+            displayAttribute="accountId" 
+            nativeObjectType="IIQUserView">
+      <AttributeDefinition name="dbId" type="string"/>
+      <AttributeDefinition name="accountId" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="firstname" type="string"/>
+      <AttributeDefinition name="lastname" type="string"/>
+      <AttributeDefinition name="fullname" type="string"/>
+      <AttributeDefinition name="organization" type="string" multiValued="true"/>
+      <AttributeDefinition name="controlledOrganizations" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilities" type="string" multiValued="true"/>
+      <AttributeDefinition name="adminRoles" type="string" multiValued="true"/>
+      <AttributeDefinition name="roles" type="string" multiValued="true"/>
+      <AttributeDefinition name="resources" type="string" multiValued="true"/>
+      <AttributeDefinition name="resourceAssignments" type="string" multiValued="true"/>
+      <AttributeDefinition name="disabled" type="boolean"/>
+      <AttributeDefinition name="locked" type="boolean"/>
+    </Schema>
+    <Schema objectType="group" 
+            displayAttribute="roleName" 
+            identityAttribute="dbId" 
+            nativeObjectType="customIIQAdminRole">
+      <AttributeDefinition name="dbId" type="string"/>
+      <AttributeDefinition name="roleName" type="string"/>
+      <AttributeDefinition name="type" type="string"/>
+      <AttributeDefinition name="organization" type="string" multiValued="true"/>
+      <AttributeDefinition name="assigners" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilities" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilitiesRule" type="string" multiValued="true"/>
+      <AttributeDefinition name="controlledOrganizations" type="string" multiValued="true"/>
+      <AttributeDefinition name="controlledOrganizationsRule" type="string" multiValued="true"/>
+    </Schema>
+  </Schemas>
+  <ProvisioningConfig metaUser='true'>
+    <!--
+      Demo manages one resource.  This is not necessary unless you
+      want to do name mapping or attribute filtering.  If you set
+      ResourceAttributes, only those will be aggreated.  If 
+      the ResourceAttributes list is left empty, we'll bring in everything 
+      that came back in the view.
+      jsl - leave this out since we'll bootstrap apps that proxy
+      back to this one so we don't require it and it looks confusing
+      if some things are here but others aren't
+    -->
+<!--
+    <ManagedResources>
+      <ManagedResource name='IDM/IdentityIQ Integration Demo'>
+        <ApplicationRef>
+          <Reference class='Application' name='IDM/IdentityIQ Integration Demo'/>
+        </ApplicationRef>
+        <ResourceAttributes>
+          <ResourceAttribute name='groups' localName='groups'/>
+        </ResourceAttributes>
+       </ManagedResource>
+    </ManagedResources>
+-->
+  </ProvisioningConfig>
+</Application>
+
+<!--===============================================================
+
+  Aggregation/Refresh Tasks
+
+===================================================================-->
+
+<!--
+  Task to aggregate from Sun IDM
+-->
+
+<TaskDefinition name="Sun IDM Aggregation">
+  <Parent>
+    <Reference class='TaskDefinition' name='Account Aggregation'/>
+  </Parent>
+  <Attributes> 
+    <Map>
+      <entry key="applications" value="Sun IDM"/>
+      <entry key="trace" value="true"/>
+      <entry key="refreshRule" value="IDM Integration Refresh"/>
+      <entry key="updateMultiplexedSchemas" value="true"/>
+    </Map>
+  </Attributes>
+</TaskDefinition>
+
+<!--
+  A rule that will be called whenever the aggregation task creates
+  or refreshes an identity.  Here we can hack on the identity to our
+  hearts content, we'll use the opportunity to set the manager.  We
+  could have modified the ObjectConfig:Identity to do this, but doing it this
+  way doesn't disrupt the normal configuration.
+
+  UPDATE: This isn't enough, we have to have manager mapped
+  in the ObjectConfig:Identity or else it will replace the value (with null)
+  the next time you refresh the cube.  See ObjectConfig:Identity below.
+-->
+<Rule name="IDM Integration Refresh" type="Refresh">
+  <Source><![CDATA[
+    import sailpoint.object.Identity;
+    if (identity != null) {
+        Identity manager = identity.getManager();
+        // be extra careful not to trash other identities
+        if (manager == null && identity.getName().startsWith("idm")) {
+            String name = "manager";
+            manager = context.getObject(Identity.class, name);
+            if (manager == null)
+                log.error("Refresh rule: Unable to locate manager: " + name);
+            else {
+                identity.setManager(manager);
+                System.out.println("Set manager for: " + identity.getName());
+            }
+        }
+    }
+  ]]></Source>
+</Rule>
+
+<!--
+  ObjectConfig:Identity necessary for the manager mapping.
+-->
+
+<Rule name='IDM Demo Manager Rule'>
+  <Source>
+    import sailpoint.object.Identity;
+
+    String managerName = null;
+    Identity manager = identity.getManager();
+    if (manager != null)
+      managerName = manager.getName();
+
+    if (identity.getName().startsWith("idm")) {
+      managerName = "manager";
+    }
+
+    return managerName;
+  </Source>
+</Rule>
+
+<ImportAction name='merge'>
+  <ObjectConfig name='Identity'>
+
+    <ObjectAttribute name='manager' displayName='Manager'
+      standard='true' groupFactory='true'>
+
+      <RuleRef>
+        <Reference class='sailpoint.object.Rule' name='IDM Demo Manager Rule'/>
+      </RuleRef>
+
+    </ObjectAttribute>
+
+  </ObjectConfig>
+</ImportAction>
+
+<!-- 
+  Refresh the right way, using the ObjectConfig:Identity and source rule
+-->
+<TaskDefinition name="IDM Refresh">
+  <Parent>
+    <Reference class='TaskDefinition' name='Identity Refresh'/>
+  </Parent>
+  <Attributes> 
+    <Map>
+      <entry key="promoteAttributes" value="true"/>
+    </Map>
+  </Attributes>
+</TaskDefinition>
+
+<!--
+  A special refresh task that just runs the rule above to assign a manager.
+  Can also be useful to fix random things.
+-->
+<TaskDefinition name="IDM Fixer">
+  <Parent>
+    <Reference class='TaskDefinition' name='Identity Refresh'/>
+  </Parent>
+  <Attributes> 
+    <Map>
+      <entry key="refreshRule" value="IDM Integration Refresh"/>
+    </Map>
+  </Attributes>
+</TaskDefinition>
+
+<!--===============================================================
+
+  Application: Sun IDM Simple
+
+  A configuration of the connector to aggregate only Sun 
+  system users (WSUser) objects.  This is how we aggregated
+  from Sun in releases prior to 5.2.  We rely on an SPML form
+  to return a simplified model.
+
+===================================================================-->
+
+<Application name="Sun IDM Simple" 
+             connector="sailpoint.connector.SunIDMConnector"
+             type="Sun IDM Connector">
+  <Attributes>
+    <Map>
+      <entry key="user" value="Configurator"/>
+      <entry key="password" value="configurator"/>
+
+<!-- redirect the host to local
+      <entry key="rpcRouterURL" value="http://houseboat.test.sailpoint.com:8080/idm/servlet/rpcrouter2"/>
+-->
+      <entry key="rpcRouterURL" value="http://localhost:8080/idm/servlet/rpcrouter2"/>
+
+
+      <!-- Admin filtering was on for the original use case aggregating
+           just IDM users.  For a full agg, turn this off.
+      <entry key="includeOnlyAdmins" value="true"/>
+      -->
+
+<!--
+      <entry key="customCIQUser.listClass" value="customCIQUserList"/>
+      <entry key="customCIQAdminRole.listClass" value="customCIQAdminRoleList"/>
+-->
+    </Map>
+  </Attributes>
+  <Schemas>
+    <Schema objectType="account"
+            displayAttribute="accountId" 
+            identityAttribute="dbId" 
+            nativeObjectType="customIIQUser">
+      <AttributeDefinition name="dbId" type="string"/>
+      <AttributeDefinition name="accountId" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="firstname" type="string"/>
+      <AttributeDefinition name="lastname" type="string"/>
+      <AttributeDefinition name="fullname" type="string"/>
+      <AttributeDefinition name="controlledOrganizations" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilities" type="string" multiValued="true"/>
+      <AttributeDefinition name="adminRoles" type="string" multiValued="true"/>
+      <AttributeDefinition name="roles" type="string" multiValued="true"/>
+      <AttributeDefinition name="resources" type="string" multiValued="true"/>
+      <AttributeDefinition name="resourceAssignments" type="string" multiValued="true"/>
+      <AttributeDefinition name="organization" type="string" multiValued="true"/>
+    </Schema>
+    <Schema objectType="group" 
+            displayAttribute="roleName" 
+            identityAttribute="dbId" 
+            nativeObjectType="customIIQAdminRole">
+      <AttributeDefinition name="dbId" type="string"/>
+      <AttributeDefinition name="roleName" type="string"/>
+      <AttributeDefinition name="type" type="string"/>
+      <AttributeDefinition name="organization" type="string" multiValued="true"/>
+      <AttributeDefinition name="assigners" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilities" type="string" multiValued="true"/>
+      <AttributeDefinition name="capabilitiesRule" type="string" multiValued="true"/>
+      <AttributeDefinition name="controlledOrganizations" type="string" multiValued="true"/>
+      <AttributeDefinition name="controlledOrganizationsRule" type="string" multiValued="true"/>
+    </Schema>
+  </Schemas>
+</Application>
+
+<!--
+  Task to aggregate from Sun IDM Simple
+-->
+
+<TaskDefinition name="Simple IDM Aggregation">
+  <Parent>
+    <Reference class='TaskDefinition' name='Account Aggregation'/>
+  </Parent>
+  <Attributes> 
+    <Map>
+      <entry key="applications" value="Sun IDM Simple"/>
+      <entry key="trace" value="true"/>
+    </Map>
+  </Attributes>
+</TaskDefinition>
+
+</sailpoint>

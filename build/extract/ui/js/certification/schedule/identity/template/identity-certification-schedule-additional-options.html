@@ -1,0 +1,278 @@
+<div ng-class="{ 'border-red' : $ctrl.hasError()}" >
+  <form name="$ctrl.{{ $ctrl.panelId }}Form" novalidate>
+    <div class="panel-body bg-white">
+      <div class="row">
+        <div class="col-xs-12">
+          <h4 class="font-bold">{{ 'ui_certification_schedule_additional_options' | spTranslate }}</h4>
+        </div>
+      </div>
+      <div ng-repeat="error in $ctrl.getErrors()">
+        <span role="alert" aria-live="assertive" tabindex="0" class="alert-danger reader-error error-outline validation-error">
+          {{ error }}
+        </span>
+      </div>
+
+      <div class="row m-t m-b">
+
+        <div class="col-xs-12 col-md-6">
+
+          <label for="certificationNameInput">{{ 'ui_certification_schedule_certification_name' | spTranslate }}<span class="text-danger" aria-label="({{ 'ui_certification_schedule_required' | spTranslate }})">*</span></label>
+          <div class="input-group m-b-lg certification-name-input">
+
+            <input id="certificationNameInput"
+                   type="text"
+                   class="form-control"
+                   ng-model="$ctrl.getDefinition().attributes.certificationNameTemplate"
+                   sp-input-replace-selection="$ctrl.nameParameterTrigger"
+                   ng-disabled="$ctrl.isReadOnly('certificationNameTemplate')">
+            <div class="input-group-btn m-t">
+              <sp-drop-down-menu-button menu-items="$ctrl.nameParameterMenuItems"
+                                        description="{{ 'ui_certification_schedule_name_parameters_description' | spTranslate }}"
+                                        menu-button-id="certificationNameParameterMenu"
+                                        align="right"
+                                        label="{{$ctrl.getNameParameterMenuLabel()}}"
+                                        label-chevron="true"
+                                        ng-disabled="$ctrl.isReadOnly('certificationNameTemplate')"/>
+            </div>
+          </div>
+        </div>
+    
+        <div class="col-xs-12 col-md-6">
+          <label for="certificationScheduleOwnerSuggest">{{ 'ui_certification_schedule_certification_owner' | spTranslate }}<span class="text-danger" aria-label="({{ 'ui_certification_schedule_required' | spTranslate }})">*</span></label>
+          <sp-object-suggest sp-object-suggest-id="certificationScheduleOwnerSuggest"
+                             sp-object-suggest-lookup-id="certificationScheduleOwnerSuggest"
+                             sp-object-suggest-class="sailpoint.object.Identity"
+                             sp-object-suggest-limit="5"
+                             sp-object-suggest-context="IncludeWorkGroups"
+                             sp-suggest-url="{{ $ctrl.suggestUrl }}"
+                             ng-model="$ctrl.getDefinition().attributes.certOwner"
+                             sp-button-aria-label="{{ 'ui_certification_schedule_certification_owner' | spTranslate }}"
+                             ng-disabled="$ctrl.isReadOnly('certOwner')">
+          </sp-object-suggest>
+        </div>
+      </div>
+    </div>
+    
+    <div class="b-b b-t bg-light lter panel-footer">
+    
+      <button class="btn btn-link text-info certification-schedule-advanced-options-toggle" ng-click="$ctrl.toggleAdvancedOptions()" id="certificationScheduleAdvancedOptionsToggleBtn" aria-expanded="{{$ctrl.showAdvancedOptions}}">
+        <span class="text-info">
+          <i class="fa fa-gear" role="presentation"></i>
+          {{ 'ui_certification_schedule_advanced_options' | spTranslate }}
+          <i class="fa" role="presentation" ng-class="{ 'fa-chevron-down' : !$ctrl.showAdvancedOptions, 'fa-chevron-up' : $ctrl.showAdvancedOptions }"></i>
+        </span>
+      </button>
+
+      <!-- START ADVANCED OPITONS COLLAPSE -->
+      <div uib-collapse="!$ctrl.showAdvancedOptions" class="certification-schedule-advanced-options m-t-lg">
+        <div class="row m-b">
+          <div class="col-lg-3 col-md-6">
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.allowListViewBulkClearDecisions"
+                         sp-id="certificationScheduleBulkClearDecisions"
+                         sp-label="ui_certification_schedule_bulk_clear_decisions"
+                         sp-disabled="$ctrl.isReadOnly('allowListViewBulkClearDecisions')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.enableEntitlementAssignments"
+                         sp-id="certificationScheduleUpdateEntitlementAssignments"
+                         sp-label="ui_certification_schedule_update_entitlement_assignments"
+                         sp-disabled="$ctrl.isReadOnly('enableEntitlementAssignments')"></sp-checkbox>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.enablePartitioning"
+                         sp-id="certificationScheduleEnablePartitioning"
+                         sp-label="ui_certification_schedule_enable_partitioning"
+                         sp-disabled="$ctrl.isReadOnly('enablePartitioning')"></sp-checkbox>
+            <div ng-show="$ctrl.getDefinition().attributes.enablePartitioning" class="form-inline">
+              <label for="certificationSchedulePartitionCount" class="font-normal m-l" ng-class="{ 'label-disabled' : $ctrl.isReadOnly('partitionCount')}">
+                {{ 'ui_certification_schedule_partition_count' | spTranslate }}
+              </label>
+              <input name="certificationSchedulePartitionCount"
+                     id="certificationSchedulePartitionCount"
+                     class="form-control input-sm"
+                     type="number"
+                     ng-model="$ctrl.getDefinition().attributes.partitionCount"
+                     ng-disabled="$ctrl.isReadOnly('partitionCount')" />
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6" ng-if="$ctrl.isRecommenderConfigured()">
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationShowRecommendations"
+                         sp-id="certificationScheduleShowRecommendations"
+                         sp-label="ui_show_recommendations"
+                         sp-disabled="$ctrl.disableShowRecommendations('certificationShowRecommendations')"></sp-checkbox>
+          </div>
+        </div>
+        <div class="row m-b-sm">
+          <div class="col-lg-3 col-md-6">
+            <h5>{{ 'ui_certification_schedule_delegation_options' | spTranslate }}</h5>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationDelegationReview"
+                         sp-id="certificationScheduleDelegationReview"
+                         sp-label="ui_certification_schedule_delegation_review"
+                         sp-disabled="$ctrl.isReadOnly('certificationDelegationReview')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationItemDelegationEnabled"
+                         sp-id="certificationScheduleItemDelegationEnabled"
+                         sp-label="ui_certification_schedule_item_delegation"
+                         sp-disabled="$ctrl.isReadOnly('certificationItemDelegationEnabled')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationEntityDelegationEnabled"
+                         sp-id="certificationScheduleEntityDelegationEnabled"
+                         sp-label="ui_certification_schedule_entity_delegation"
+                         sp-disabled="$ctrl.isReadOnly('certificationEntityDelegationEnabled')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationDisableDelegationForwarding"
+                         sp-id="certificationScheduleDisableDelegationForwarding"
+                         sp-label="ui_certification_schedule_disable_delegation_forwarding"
+                         sp-disabled="$ctrl.isReadOnly('certificationDisableDelegationForwarding')"></sp-checkbox>
+            <div class="m-t-sm">
+              <label for="certificationScheduleCertifierPreDelegationRule">{{ 'ui_certification_schedule_pre_delegation_rule' | spTranslate }}</label>
+              <sp-object-suggest
+                      sp-object-suggest-id="certificationScheduleCertifierPreDelegationRule"
+                      sp-object-suggest-lookup-id="certificationScheduleCertifierPreDelegationRule"
+                      sp-object-suggest-class="sailpoint.object.Rule"
+                      sp-object-suggest-filter='type == "CertificationPreDelegation"'
+                      sp-object-suggest-limit="5"
+                      sp-suggest-url="{{ $ctrl.suggestUrl }}"
+                      ng-model="$ctrl.getDefinition().attributes.preDelegationRuleName"
+                      sp-button-aria-label="{{ 'ui_certification_schedule_pre_delegation_rule' | spTranslate }}"
+                      sp-object-suggest-placeholder="{{ 'ui_certification_schedule_select_rule' | spTranslate}}"
+                      ng-disabled="$ctrl.isReadOnly('preDelegationRuleName')">
+              </sp-object-suggest>
+              <sp-checkbox sp-disabled="!$ctrl.getDefinition().attributes.preDelegationRuleName || $ctrl.isReadOnly('sendPreDelegationCompleteEmails')"
+                           ng-model="$ctrl.getDefinition().attributes.sendPreDelegationCompleteEmails"
+                           sp-id="identityCertificationScheduleSendPreDelegationCompleteEmails"
+                           sp-label="{{ 'ui_certification_schedule_send_pre_delegation_complete_emails' | spTranslate }}">
+              </sp-checkbox>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5>{{ 'ui_certification_schedule_approve_options' | spTranslate }}</h5>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.requireApprovalComments"
+                         sp-id="certificationScheduleRequireApprovalComments"
+                         sp-label="ui_certification_schedule_require_approval_comments"
+                         sp-disabled="$ctrl.isReadOnly('requireApprovalComments')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.allowListViewBulkApprove"
+                         sp-id="certificationScheduleBulkApprove"
+                         sp-label="ui_certification_schedule_bulk_approval"
+                         sp-disabled="$ctrl.isReadOnly('allowListViewBulkApprove')"></sp-checkbox>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5>{{ 'ui_certification_schedule_revoke_options' | spTranslate }}</h5>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.allowListViewBulkRevoke"
+                         sp-id="certificationScheduleBulkRevoke"
+                         sp-label="ui_certification_schedule_bulk_revoke"
+                         sp-disabled="$ctrl.isReadOnly('allowListViewBulkRevoke') || $ctrl.isDependentOptionEnabled('certifyAccounts')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.enableAccountRevokeAction"
+                         sp-id="certificationScheduleEnableAccountRevoke"
+                         sp-label="ui_certification_schedule_account_revoke"
+                         sp-on-click="$ctrl.clearDependentOption('enableAccountRevokeAction', 'allowListViewBulkAccountRevoke', false)"
+                         sp-disabled="$ctrl.isReadOnly('enableAccountRevokeAction')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.allowListViewBulkAccountRevoke"
+                         sp-id="certificationScheduleBulkAccountRevoke"
+                         sp-label="ui_certification_schedule_bulk_account_revoke"
+                         sp-disabled="$ctrl.isReadOnly('allowListViewBulkAccountRevoke') || !$ctrl.isDependentOptionEnabled('enableAccountRevokeAction')"></sp-checkbox>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <h5>{{ 'ui_certification_schedule_allow_exceptions_options' | spTranslate }}</h5>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationMitigationEnabled"
+                         sp-id="certificationScheduleMitigationEnabled"
+                         sp-label="ui_certification_schedule_allow_exceptions"
+                         sp-on-click="$ctrl.clearDependentOption('certificationMitigationEnabled', 'allowListViewBulkMitigate', false)"
+                         sp-disabled="$ctrl.isReadOnly('certificationMitigationEnabled')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.allowListViewBulkMitigate"
+                         sp-id="certificationScheduleBulkMitigate"
+                         sp-label="ui_certification_schedule_allow_exceptions_bulk"
+                         sp-disabled="$ctrl.isReadOnly('allowListViewBulkMitigate') || !$ctrl.isDependentOptionEnabled('certificationMitigationEnabled')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.certificationMitigationPopupEnabled"
+                         sp-id="certificationScheduleMitigationPopupEnabled"
+                         sp-label="ui_certification_schedule_allow_exceptions_popup"
+                         sp-disabled="$ctrl.isReadOnly('certificationMitigationPopupEnabled')"></sp-checkbox>
+            <sp-checkbox ng-model="$ctrl.getDefinition().attributes.requireMitigationComments"
+                         sp-id="certificationScheduleRequireMitigationComments"
+                         sp-label="ui_certification_schedule_allow_exceptions_require_comments"
+                         sp-disabled="$ctrl.isReadOnly('requireMitigationComments')"></sp-checkbox>
+            <div class="m-t-sm">
+              <span class="duration-label">{{ 'ui_certification_schedule_allow_exceptions_default_duration' | spTranslate }}<span class="text-danger" aria-label="({{ 'ui_certification_schedule_required' | spTranslate }})">*</span></span>
+              <sp-duration sp-amount-model="$ctrl.getDefinition().attributes.mitigationDurationAmount"
+                           sp-scale-model="$ctrl.getDefinition().attributes.mitigationDurationScale"
+                           sp-id="mitigationDuration"
+                           sp-input-name="mitigationDurationAmount"
+                           sp-scale-options="$ctrl.getDurationScales()"
+                           sp-aria-label="ui_certification_schedule_allow_exceptions_default_duration"
+                           ng-disabled="$ctrl.isReadOnly('mitigationDurationAmount') || $ctrl.isReadOnly('mitigationDurationScale')"
+                           ng-required="true"
+                           sp-size="sm"
+                           sp-min="0"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="row m-b-sm">
+          <div class="col-xs-12">
+            <h5>{{ 'ui_certification_schedule_access_review_properties' | spTranslate }}</h5>
+          </div>
+          <div class="col-xs-12 col-md-6">
+
+            <label for="accessReviewNameInput">{{ 'ui_certification_schedule_access_review_name_template' | spTranslate }}</label>
+            <div class="input-group m-b-lg access-review-name-input">
+
+              <input id="accessReviewNameInput"
+                     type="text"
+                     class="form-control"
+                     ng-model="$ctrl.getDefinition().attributes.nameTemplate"
+                     sp-input-replace-selection="$ctrl.accessReviewNameParameterTrigger"
+                     ng-disabled="$ctrl.isReadOnly('nameTemplate')">
+              <div class="input-group-btn m-t">
+                <sp-drop-down-menu-button menu-items="$ctrl.accessReviewNameParameterMenuItems"
+                                          description="{{ 'ui_certification_schedule_name_parameters_description' | spTranslate }}"
+                                          menu-button-id="accessReviewNameParameterMenu"
+                                          align="right"
+                                          label="{{$ctrl.getNameParameterMenuLabel()}}"
+                                          label-chevron="true"
+                                          ng-disabled="$ctrl.isReadOnly('nameTemplate')"/>
+              </div>
+            </div>
+          </div>
+          <div class="col-xs-12 col-md-6">
+
+            <label for="accessReviewShortNameInput">{{ 'ui_certification_schedule_access_review_short_name_template' | spTranslate }}</label>
+            <div class="input-group m-b-lg access-review-short-name-input">
+
+              <input id="accessReviewShortNameInput"
+                     type="text"
+                     class="form-control"
+                     ng-model="$ctrl.getDefinition().attributes.shortNameTemplate"
+                     sp-input-replace-selection="$ctrl.accessReviewShortNameParameterTrigger"
+                     ng-disabled="$ctrl.isReadOnly('shortNameTemplate')">
+              <div class="input-group-btn m-t">
+                <sp-drop-down-menu-button menu-items="$ctrl.accessReviewShortNameParameterMenuItems"
+                                          description="{{ 'ui_certification_schedule_name_parameters_description' | spTranslate }}"
+                                          menu-button-id="accessReviewShortNameParameterMenu"
+                                          align="right"
+                                          label="{{$ctrl.getNameParameterMenuLabel()}}"
+                                          label-chevron="true"
+                                          ng-disabled="$ctrl.isReadOnly('shortNameTemplate')"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12 col-md-6" ng-if="$ctrl.isIncludeScope()">
+
+            <label for="assignedScopeSuggest">{{ 'ui_certification_schedule_scope' | spTranslate }}</label>
+            <sp-object-suggest sp-object-suggest-id="assignedScopeSuggest"
+                               sp-object-suggest-lookup-id="assignedScopeSuggest"
+                               sp-object-suggest-class="sailpoint.object.Scope"
+                               sp-object-suggest-limit="5"
+                               sp-suggest-url="{{ $ctrl.suggestUrl }}"
+                               ng-model="$ctrl.getDefinition().assignedScope"
+                               sp-button-aria-label="{{ 'ui_certification_schedule_scope' | spTranslate }}"
+                               ng-disabled="$ctrl.isReadOnly('assignedScope')">
+            </sp-object-suggest>
+          </div>
+        </div>
+        <div class="row m-b-lg">
+          <div class="col-xs-12">
+            <h5>{{ 'ui_certification_schedule_tags' | spTranslate }}</h5>
+            <sp-tag-editor ng-model="$ctrl.getDefinition().tags" sp-suggest-url="{{ $ctrl.suggestUrl }}" sp-id="certificationTags" ng-disabled="$ctrl.isReadOnly('tags')"></sp-tag-editor>
+          </div>
+        </div>
+      </div>
+      <!-- END ADVANCED OPITONS COLLAPSE -->
+    </div>
+  </form>
+</div>

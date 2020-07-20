@@ -1,0 +1,9 @@
+<a ng-class="{'invalid' : match.model.accounts.length < 1}"
+    aria-label="{{match.model.displayName}}" class="suggest-item pam-suggest-item" role="option" aria-live="assertive">
+  <div class="item-details">
+    <i ng-if="match.model.icon" role="presentation" class="fa {{(match.model.isWorkgroup) ? 'fa-users' : 'fa-user' }}"></i>
+    <span ng-bind-html="(match.model.displayName | encodeHtml) | uibTypeaheadHighlight:query" />
+    <span class="indented" ng-if="match.model.email">{{ match.model.email }}</span>
+  </div>
+  <div class="invalid-message"><em>{{'ui_pam_container_identities_suggest_no_account' | spTranslate}}</em></div>
+</a>

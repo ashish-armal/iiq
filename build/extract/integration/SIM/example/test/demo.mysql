@@ -1,0 +1,50 @@
+-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved.
+
+CREATE DATABASE IF NOT EXISTS identityiq CHARACTER SET utf8 COLLATE utf8_bin;
+
+GRANT ALL PRIVILEGES ON identityiq.*
+    TO 'identityiq' IDENTIFIED BY 'identityiq';
+
+GRANT ALL PRIVILEGES ON identityiq.*
+    TO 'identityiq'@'%' IDENTIFIED BY 'identityiq';
+
+GRANT ALL PRIVILEGES ON identityiq.*
+    TO 'identityiq'@'localhost' IDENTIFIED BY 'identityiq';
+
+USE identityiq;
+
+CREATE TABLE idm_users (
+  id varchar(128) not null,
+  password varchar(128),
+  firstname varchar(128),
+  lastname varchar(128),
+  email varchar(128),
+  department varchar(128),
+  disabled varchar(128)
+);
+
+CREATE TABLE idm_groups (
+  id varchar(128) not null,
+  name varchar(128),
+  description varchar(128)
+);
+
+CREATE TABLE idm_members (
+  user_id varchar(128) not null,
+  group_id varchar(128) not null
+);
+
+insert into idm_users (id, firstname, lastname) values("idm1", "User", "Number1");
+insert into idm_users (id, firstname, lastname) values("idm2", "User", "Number2");
+insert into idm_users (id, firstname, lastname) values("idm3", "User", "Number3");
+
+insert into idm_groups(id, name) values("A", "Group A");
+insert into idm_groups(id, name) values("B", "Group B");
+insert into idm_groups(id, name) values("C", "Group C");
+insert into idm_groups(id, name) values("D", "Group D");
+insert into idm_groups(id, name) values("E", "Group E");
+insert into idm_groups(id, name) values("F", "Group F");
+
+insert into idm_members(user_id, group_id) values("idm1", "A");
+insert into idm_members(user_id, group_id) values("idm2", "B");
+insert into idm_members(user_id, group_id) values("idm3", "C");

@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='init-default_org.xml'/>
+  <ImportAction name='include' value='patch/identityiq-7.3p3-objects.xml'/>
+  <ImportAction name='include' value='patch/identityiq-7.3p3.xml'/>
+  <ImportAction name='include' value='patch/identityiq-lcm-7.3p3-objects.xml'/>
+  <ImportAction name='include' value='patch/identityiq-lcm-7.3p3.xml'/>
+  <ImportAction name='include' value='sp.init-custom.xml'/>
+</sailpoint>

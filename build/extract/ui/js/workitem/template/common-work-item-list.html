@@ -1,0 +1,183 @@
+<section ng-cloak="ng-cloak">
+  <div id="workItemListMask" sp-loading-mask="workItemListCtrl.items" role="presentation">
+    <!-- Sub-Header -->
+    <header class="panel-heading bg-white no-radius"
+            ng-hide="workItemListCtrl.pageState.pagingData.getTotal() &lt; 1 && workItemListCtrl.isMobile()">
+      <div class="text font-thin h4 m-t-xs m-b-xs row">
+        <div class="col-xs-4 m-t-xs">
+          <span ng-if="workItemListCtrl.isMobile()">
+            {{ workItemListCtrl.getPageTitle() | spTranslate }}
+              <span id="workItemCountBadge" class="badge bg-info">
+                {{ workItemListCtrl.pageState.pagingData.getTotal() }}
+              </span>
+          </span>
+          <!-- Make the desktop page label consistent with other desktop headers -->
+          <span ng-if="!workItemListCtrl.isMobile()" class="sp-page-header">
+            <h1>
+            {{ workItemListCtrl.getPageTitle() | spTranslate }}
+              <span id="workItemCountBadgeDesktop" class="badge bg-info">
+                {{ workItemListCtrl.pageState.pagingData.getTotal() }}
+              </span>
+            </h1>
+          </span>
+        </div>
+
+        <!-- Sort by drop down -->
+        <div class="col-xs-8 text-right">
+          <div role="presentation" class="btn-group m-l-xs" uib-dropdown="">
+            <button id="sortByMenuBtn" role="button" type="button"
+                    class="btn btn-white dropdown-toggle"
+                    aria-label="{{ 'ui_work_item_list_sort_by_sr' | spTranslate }}"
+                    ng-class="{'btn-sm' : workItemListCtrl.isMobile(), 'btn' : !workItemListCtrl.isMobile()}"
+                    data-toggle="dropdown"
+                    ng-show="workItemListCtrl.pageState.pagingData.getTotal() &gt; 0 || !workItemListCtrl.isMobile()">
+              {{ 'ui_work_item_list_sort_by' | spTranslate }} <i class="fa fa-chevron-down chevron m-l-xs"
+                                role="presentation"></i>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu="" role="menu"
+                aria-labelledby="sortByMenuBtn">
+              <li role="presentation">
+                <a href="" ng-click="workItemListCtrl.sortByNewest()" role="menuitem"
+                   aria-label="{{ 'ui_work_item_list_sort_by_newest_sr' | spTranslate }} {{ workItemListCtrl.isSortByNewest() ? 'ui_selected' : '' | spTranslate}}">
+                  {{ 'ui_work_item_list_sort_by_newest' | spTranslate }}
+                  <i class="fa fa-check text-muted"
+                     ng-if="workItemListCtrl.isSortByNewest()"></i>
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="" ng-click="workItemListCtrl.sortByOldest()" role="menuitem"
+                   aria-label="{{ 'ui_work_item_list_sort_by_oldest_sr' | spTranslate }} {{ workItemListCtrl.isSortByOldest() ? 'ui_selected' : '' | spTranslate}}">
+                  {{ 'ui_work_item_list_sort_by_oldest' | spTranslate }}
+                  <i class="fa fa-check text-muted"
+                     ng-if="workItemListCtrl.isSortByOldest()"></i>
+                </a>
+              </li>
+              <li role="presentation">
+                <a href="" ng-click="workItemListCtrl.sortByPriority()" role="menuitem"
+                   aria-label="{{ 'ui_work_item_list_sort_by_priority_sr' | spTranslate }} {{ workItemListCtrl.isSortByPriority() ? 'ui_selected' : '' | spTranslate}}">
+                  {{ 'ui_work_item_list_sort_by_priority' | spTranslate }}
+                  <i class="fa fa-check text-muted"
+                     ng-if="workItemListCtrl.isSortByPriority()"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <button id="workItemListFilterBtn" class="btn icon-btn" tabindex="0"
+                  ng-if="workItemListCtrl.hasFilters() && !workItemListCtrl.isMobile()"
+                  ng-click="workItemListCtrl.toggleFiltersDisplayed()"
+                  ng-class="{ 'btn-success': workItemListCtrl.hasAppliedFilters(), 'btn-white': !workItemListCtrl.hasAppliedFilters() }">
+            <i class="fa fa-filter fa-lg" role="presentation"></i>
+            <span class="hidden-xs hidden-sm">{{ 'ui_cardlist_filter' | spTranslate }}</span>
+            <sp-chevron class="hidden-sm hidden-xs"
+                        sp-collapsed="!workItemListCtrl.filtersDisplayed"
+                        sp-template-style="collapsible"></sp-chevron>
+            <span class="sr-only">{{ workItemListCtrl.getFilterButtonSrMessage() | spTranslate }}</span>
+          </button>
+
+          <button id="collapseExpandAllButton" ng-if="workItemListCtrl.canCollapseExpandAll()" type="button" role="button"
+                  class="btn btn-white" ng-click="workItemListCtrl.toggleCollapseExpandAll()" aria-hidden="false">
+            <i class="fa fa-expand" ng-if="workItemListCtrl.isCollapseAll()"></i>
+            <i class="fa fa-compress" ng-if="!workItemListCtrl.isCollapseAll()"></i>
+            <span class="sr-only"> {{ workItemListCtrl.getCollapseExpandAllSrStr() | spTranslate }} </span>
+            <span aria-hidden="true" class="hidden-xs hidden-sm">{{ workItemListCtrl.getCollapseExpandAllStr() | spTranslate }}</span>
+          </button>
+
+          <div class="input-group v-middle work-item-list-search pull-right m-l-xs" ng-if="!workItemListCtrl.isMobile()">
+            <input id="workItemListSearchInput"
+                   ng-model="workItemListCtrl.searchScratchPad.searchTerm"
+                   ng-keypress="workItemListCtrl.search($event)"
+                   class="form-control input-group-sm"
+                   aria-label="{{ workItemListCtrl.getPlaceholderText() }}"
+                   ng-attr-placeholder="{{ workItemListCtrl.getPlaceholderText() }}">
+            <span class="input-group-btn">
+              <button id="workItemListSearchBtn"
+                      ng-click="workItemListCtrl.search()"
+                      aria-label="{{ 'ui_cardlist_search_button_sr' | spTranslate }}"
+                      class="btn btn-info">
+                <i class="fa fa-search" role="presentation"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="card-list-filters">
+      <div class="row">
+        <div class="col-md-12 sp-animate fade-in-down">
+          <sp-filter-panel id="workItemListFilterPanel"
+                           sp-search-data="workItemListCtrl.searchScratchPad"
+                           sp-displayed="workItemListCtrl.filtersDisplayed"
+                           sp-apply-func="workItemListCtrl.search()">
+          </sp-filter-panel>
+        </div>
+      </div>
+    </section>
+    <!-- work item list -->
+    <section class="wrapper bg-light dker"
+             ng-swipe-right="workItemListCtrl.previousPage()"
+             ng-swipe-left="workItemListCtrl.nextPage()"
+             ng-swipe-disable-mouse="true">
+
+      <div class="text-right m-b-lg" ng-if="workItemListCtrl.showRecommendationBtn()">
+        <button class="btn btn-xs rec-info-btn btn-white"
+                id="recommendationExplanationModalBtn"
+                ng-click="workItemListCtrl.showRecommendationExplanationDialog()">
+            <span class="m-r-n-xs">
+              <span class="fa-stack m-t-xs fa-lg bounceIn rec-approve">
+                  <i class="fa fa-circle fa-stack-2x recommendation-yes-icon" role="presentation"></i>
+                  <i class="fa fa-thumbs-up fa-stack-1x text-white" role="presentation"></i>
+                </span>
+                <span class="fa-stack m-t-xs fa-lg rec-deny recommend">
+                  <i class="fa fa-circle fa-stack-2x text-danger" role="presentation"></i>
+                  <i class="fa fa-thumbs-down fa-stack-1x text-white" role="presentation"></i>
+                </span>
+            </span>
+          <span class="m-l-xs rec-text">{{'ui_approval_recommendations' | spTranslate}}</span>
+          <span class="small m-t-n-xxs"> <i class="fa fa-question-circle fa-lg text-info"></i></span>
+        </button>
+      </div>
+
+      <!-- Work Item -->
+      <section ng-repeat="workItem in workItemListCtrl.items">
+        <sp-work-item sp-work-item="workItem"
+                      sp-completion-callback="workItemListCtrl.completionCallback"
+                      sp-full="false"
+                      sp-index="$index"/>
+      </section>
+      <div class="row m-b">
+        <div class="hidden-xs col-sm-4"></div>
+        <div class="col-sm-4 col-xs-12 extra-padding">
+          <sp-current-page-info ng-model="workItemListCtrl.pageState.pagingData"
+                                ng-if="workItemListCtrl.pageState.pagingData.getTotal() > 0"/>
+        </div>
+        <div class="col-sm-4">
+          <div class="text-center col-xs-12"
+               ng-show="workItemListCtrl.pageState.pagingData.hasMultiplePages()"
+               id="workItemPager">
+            <ul sp-uib-pagination=""
+                class="pagination-sm"
+                total-items="workItemListCtrl.pageState.pagingData.getTotal()"
+                items-per-page="workItemListCtrl.pageState.pagingData.itemsPerPage"
+                ng-model="workItemListCtrl.pageState.pagingData.currentPage"
+                ng-change="workItemListCtrl.fetchItems()"
+                max-size="4"
+                rotate="true">
+            </ul>
+          </div>
+        </div>
+      </div>
+      <section id="content" class="m-t-lg"
+               ng-show="workItemListCtrl.pageState.pagingData.getTotal() === 0">
+        <div class="row m-n" role="presentation">
+          <div class="col-md-12">
+            <div class="col-xs-12 text-center">
+              <h3 class="text-muted">
+                {{ workItemListCtrl.getNoItemsMessage() | spTranslate }}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section> <!-- /work item list -->
+  </div>
+</section> <!-- /.scrollable -->

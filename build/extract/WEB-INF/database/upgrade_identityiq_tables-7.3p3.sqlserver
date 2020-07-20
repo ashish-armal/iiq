@@ -1,0 +1,64 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+USE identityiq
+GO
+
+-- Enable automatic snapshot isolation
+ALTER DATABASE identityiq SET ALLOW_SNAPSHOT_ISOLATION ON
+GO
+ALTER DATABASE identityiq SET READ_COMMITTED_SNAPSHOT ON
+GO
+
+-- Add Request.live column
+alter table identityiq.spt_request add live tinyint null default 0 with values;
+GO
+update identityiq.spt_request set live = 0;
+GO
+
+--
+-- IdentityAI recommendation schema changes
+--
+create table identityiq.spt_recommender_definition (
+  id nvarchar(32) not null,
+  created numeric(19,0),
+  modified numeric(19,0),
+  name nvarchar(128) not null,
+  attributes nvarchar(max),
+  primary key (id)
+);
+GO
+
+alter table identityiq.spt_recommender_definition
+add constraint uk_ekuvq6a1uhwkxb7fofir077xv unique (name);
+GO
+
+create index spt_recommender_def_name_ci on identityiq.spt_recommender_definition (name);
+GO
+alter table identityiq.spt_certification_item add recommend_value nvarchar(100);
+GO
+
+create table identityiq.spt_module (
+  id nvarchar(32) not null,
+  created numeric(19,0),
+  modified numeric(19,0),
+  name nvarchar(128) not null,
+  description nvarchar(512),
+  attributes nvarchar(max),
+  primary key (id)
+);
+GO
+
+alter table identityiq.spt_module
+add constraint uk_bebq8nsflsucu90sph68pf43r unique (name);
+GO
+
+create index spt_module_name_ci on identityiq.spt_module (name);
+GO
+
+update identityiq.spt_database_version set schema_version = '7.3-13' where name = 'main';
+GO
+

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ProvisioningPlan PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+
+A provisioning plan that will create a resource account.
+This is designed to restore the test account that was deleted
+with plan-delete.xml. If you run this without first deleting
+the account, it will simply update the existing account.
+
+-->
+<ProvisioningPlan nativeIdentity='idm1'>
+  <AccountRequest application='IDM/IdentityIQ Integration Demo' nativeIdentity='idm1' op='Create'>
+    <AttributeRequest name='firstname' op='Set' value='User'/>
+    <AttributeRequest name='lastname' op='Set' value='Number1'/>
+    <AttributeRequest name='groups' op='Add' value='Group A'/>
+  </AccountRequest>
+</ProvisioningPlan>

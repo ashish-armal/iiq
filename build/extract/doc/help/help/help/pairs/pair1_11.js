@@ -1,0 +1,23 @@
+var pairs =
+{
+"targeted":{"certifications":1}
+,"certifications":{"access":1}
+,"access":{"review":1,"reviews":1}
+,"review":{"look":1,"access":1,"decisions\u002Foperations":1}
+,"look":{"different":1}
+,"different":{"instance":1}
+,"instance":{"identityiq":1}
+,"identityiq":{"depending":1}
+,"depending":{"configuration":1}
+,"configuration":{"options":1}
+,"options":{"selected":1}
+,"selected":{"certification":1}
+,"certification":{"defined":1,"overview":1}
+,"defined":{"detailed":1}
+,"detailed":{"information":1}
+,"information":{"certifications":1,"completing":1}
+,"reviews":{"certification":1}
+,"overview":{"detailed":1}
+,"completing":{"access":1}
+}
+;Search.control.loadWordPairs(pairs);

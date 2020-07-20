@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE ProvisioningPlan PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+
+A provisioning plan that will add "Group B" to user "idm1".
+
+-->
+<ProvisioningPlan nativeIdentity='idm1'>
+  <AccountRequest application='IDM/IdentityIQ Integration Demo' nativeIdentity='idm1' op='Modify'>
+    <AttributeRequest name='groups' op='Add' value='Group B'/>
+  </AccountRequest>
+</ProvisioningPlan>

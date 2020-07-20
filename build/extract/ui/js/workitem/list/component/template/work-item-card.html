@@ -1,0 +1,162 @@
+  <!-- Desktop section -->
+  <div sp-if-size="md lg">
+
+    <div class="panel work-item-card" id="workItemCard-{{::$ctrl.workItem.id}}">
+
+      <div class="panel-heading">
+        <div class="row">
+          <div class="col-lg-2 col-md-2 v-middle">
+            <sp-priority-button sp-id="editPriority-{{::$ctrl.workItem.id}}"
+                                sp-icon-only="true"
+                                sp-on-click="$ctrl.setPriority(priority, $ctrl.workItem)"
+                                sp-priority="$ctrl.workItem.priority"
+                                sp-disabled="::!$ctrl.isPriorityEditingEnabled()"
+                                sr-label="{{$ctrl.getSrLabel()}}" >
+            </sp-priority-button>
+            <span class="m-t-sm h5 inline font-bold">{{$ctrl.getWorkItemTypeTranslation()}}</span>
+          </div>
+
+          <!-- work item info -->
+          <div class="col-lg-8 col-md-7">
+          <span class="v-middle">
+            <div class="v-middle font-semibold panel-title" title="">
+              <sp-more-less-toggle large-max-length="100" text="{{::$ctrl.workItem.description}}"
+                                   sr-label="{{$ctrl.getSrLabel()}}"></sp-more-less-toggle>
+            </div>
+            <div class="text-sm m-t-xs">
+              <div class="block">
+                <span ng-repeat="column in $ctrl.displayedColumnConfigs">
+                  <div class="inline work-item-card-column-data" ng-if="column.getObjectValue($ctrl.workItem)">
+                    <span aria-hidden="true" ng-if="!$first"> | </span>
+                    <strong>{{ column.getHeaderKey() | translate }}:</strong>
+                    <sp-column-data sp-column-config="column" sp-model="$ctrl.workItem"></sp-column-data>
+                  </div>
+                </span>
+                <span ng-if="$ctrl.workItem.isOwnerWorkgroup()">
+                  <div class="inline">
+                    <span aria-hidden="true"> | </span>
+                    <strong>{{'ui_workitems_assigned_to' | translate}}:</strong>
+                    <a href="" ng-click="$ctrl.showWorkgroupAssignmentDialog()" class="text-info"
+                       data-toggle="modal" data-target="#assign"
+                       aria-label="{{$ctrl.getAriaLabel('ui_workitems_assigned_to_sr')}}">
+                      {{$ctrl.workItem.getAssigneeName()}}
+                      <em class="fa fa-pencil"></em>
+                    </a>
+                  </div>
+                </span>
+              </div>
+            </div>
+          </span>
+          </div>
+
+          <!-- buttons -->
+          <div class="col-lg-2 col-md-3 text-right m-t-xs">
+          <span class="row-options">
+              <button id="workitem-details-btn-{{::$ctrl.workItem.id}}" class="btn btn-white btn-sm m-r-xs"
+                      ng-click="$ctrl.showDetails()"
+                      aria-label="{{$ctrl.getAriaLabel('ui_workitems_show_details_sr')}}">
+                <i class="fa fa-info-circle" role="presentation"></i>
+              </button>
+              <button id="workitem-forward-btn-{{::$ctrl.workItem.id}}" class="btn btn-white btn-sm m-r-xs"
+                      ng-click="$ctrl.showForwardDialog()"
+                      aria-label="{{$ctrl.getAriaLabel('ui_workitems_forward_sr')}}"
+                      title="{{ 'ui_button_forward' | translate }}">
+                <i class="fa fa-share" role="presentation"></i>
+              </button>
+          </span>
+            <button id="workitem-goto-btn-{{::$ctrl.workItem.id}}" ng-click="$ctrl.viewDetails()"
+                    aria-label="{{$ctrl.getAriaLabel('ui_workitems_view_sr')}}"
+                    class="btn btn-white btn-sm arrow-button" >
+              {{ 'ui_workitems_view_details_button' | spTranslate }}
+              <i class="fa fa-chevron-right" role="presentation"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Tablet section -->
+<div sp-if-size="xs sm">
+  <div class="panel work-item-card" id="workItemCardTablet-{{::$ctrl.workItem.id}}">
+
+
+    <div class="work-item-card-tablet">
+      <div class="panel-heading wrapper">
+        <div class="m-b-xs m-t-xs">
+          <div class="text-left col-xs-4">
+            <sp-priority-button sp-id="editPriority-{{::$ctrl.workItem.id}}"
+                                sp-icon-only="true"
+                                sp-on-click="$ctrl.setPriority(priority, $ctrl.workItem)"
+                                sp-priority="$ctrl.workItem.priority"
+                                sp-disabled="::!$ctrl.isPriorityEditingEnabled()"
+                                sr-label="{{$ctrl.getSrLabel()}}" >
+            </sp-priority-button>
+          </div>
+
+          <div class="text-center col-xs-4">
+            <span class="badge bg-default m-t-sm inline font-bold">{{$ctrl.getWorkItemTypeTranslation()}}</span>
+          </div>
+
+          <!-- buttons -->
+          <div class="text-right col-xs-4">
+        <span class="row-options">
+            <button id="workitem-details-tablet-btn-{{::$ctrl.workItem.id}}" class="btn btn-white btn-sm m-r-xs m-b-sm"
+                    ng-click="$ctrl.showDetails()"
+                    aria-label="{{$ctrl.getAriaLabel('ui_workitems_show_details_sr')}}">
+              <i class="fa fa-info-circle" role="presentation"></i>
+            </button>
+            <button id="workitem-forward-tablet-btn-{{::$ctrl.workItem.id}}" class="btn btn-white btn-sm m-r-xs m-b-sm"
+                    ng-click="$ctrl.showForwardDialog()"
+                    aria-label="{{$ctrl.getAriaLabel('ui_workitems_forward_sr')}}">
+              <i class="fa fa-share" role="presentation"></i>
+            </button>
+        </span>
+          </div>
+        </div>
+
+        <div class="text-center v-middle font-semibold panel-title" title="">
+          <sp-more-less-toggle large-max-length="100" text="{{::$ctrl.workItem.description}}"
+                               sr-label="{{$ctrl.getSrLabel()}}"></sp-more-less-toggle>
+        </div>
+      </div>
+
+      <div class="wrapper">
+        <ul class="list-group no-radius">
+          <li class="list-group-item">
+            <strong>{{'ui_workitems_created' | translate}}:</strong> {{::$ctrl.workItem.created | spDate:'shortDate'}}
+          </li>
+          <li class="list-group-item" ng-repeat="column in $ctrl.displayedColumnConfigs">
+            <strong>{{ column.getHeaderKey() | translate }}:</strong>
+            <sp-column-data sp-column-config="column" sp-model="$ctrl.workItem"></sp-column-data>
+          </li>
+          <li class="list-group-item" ng-if="$ctrl.workItem.isOwnerWorkgroup()">
+            <strong>{{'ui_workitems_assigned_to' | translate}}:</strong>
+            <a href="" ng-click="$ctrl.showWorkgroupAssignmentDialog()" class="text-info"
+               data-toggle="modal" data-target="#assign"
+               aria-label="{{$ctrl.getAriaLabel('ui_workitems_assigned_to_sr')}}">
+              {{$ctrl.workItem.getAssigneeName()}}
+              <em class="fa fa-pencil"></em>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="wrapper bg-light lter">
+        <div class="row">
+          <div class="col-xs-8 col-xs-offset-2 text-center">
+            <button id="workitem-goto-tablet-btn-{{::$ctrl.workItem.id}}" ng-click="$ctrl.viewDetails()"
+                    aria-label="{{$ctrl.getAriaLabel('ui_workitems_view_sr')}}"
+                    class="btn btn-white btn-block btn-sm arrow-button" >
+              {{ 'ui_workitems_view_details_button' | spTranslate }}
+              <i class="fa fa-arrow-right" role="presentation"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

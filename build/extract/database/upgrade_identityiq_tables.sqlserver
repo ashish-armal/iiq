@@ -1,0 +1,197 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+USE identityiq
+GO
+
+-- Environmental Monitoring
+create table identityiq.spt_monitoring_statistic (
+        id nvarchar(32) not null,
+        created numeric(19,0) null,
+        modified numeric(19,0) null,
+        owner nvarchar(32) null,
+        assigned_scope nvarchar(32) null,
+        assigned_scope_path nvarchar(450) null,
+        name nvarchar(128) not null unique,
+        display_name nvarchar(128) null,
+        description nvarchar(1024) null,
+        value nvarchar(4000) null,
+        value_type nvarchar(128) null,
+        type nvarchar(128) null,
+        attributes nvarchar(max) null,
+        template tinyint null,
+        primary key (id)
+    );
+GO
+
+create table identityiq.spt_monitoring_statistic_tags (
+    statistic_id nvarchar(32) not null,
+    elt nvarchar(32) not null
+);
+GO
+
+create index FK6C20072771E36ACA on identityiq.spt_mitigation_expiration (mitigator);
+GO
+
+alter table identityiq.spt_monitoring_statistic
+    add constraint FK9B2F43A1A5FB1B1
+    foreign key (owner)
+    references identityiq.spt_identity;
+GO
+
+create index FK9B2F43A1A5FB1B1 on identityiq.spt_monitoring_statistic (owner);
+GO
+
+alter table identityiq.spt_monitoring_statistic
+    add constraint FK9B2F43A1486634B7
+    foreign key (assigned_scope)
+    references identityiq.spt_scope;
+GO
+
+create index FK9B2F43A1486634B7 on identityiq.spt_monitoring_statistic (assigned_scope);
+GO
+
+alter table identityiq.spt_monitoring_statistic_tags
+    add constraint FK770FC5F7E6181207
+    foreign key (elt)
+    references identityiq.spt_tag;
+GO
+
+create index FK770FC5F7E6181207 on identityiq.spt_monitoring_statistic_tags (elt);
+GO
+
+alter table identityiq.spt_monitoring_statistic_tags
+    add constraint FK770FC5F7315E4612
+    foreign key (statistic_id)
+    references identityiq.spt_monitoring_statistic;
+GO
+
+create index FK770FC5F7315E4612 on identityiq.spt_monitoring_statistic_tags (statistic_id);
+GO
+
+create index SPT_IDXF89E6D4D93CDB0EE on identityiq.spt_monitoring_statistic (assigned_scope_path);
+GO
+
+create table identityiq.spt_server_statistic (
+        id nvarchar(32) not null,
+        created numeric(19,0) null,
+        modified numeric(19,0) null,
+        name nvarchar(128) not null,
+        snapshot_name nvarchar(128) null,
+        value nvarchar(4000) null,
+        value_type nvarchar(128) null,
+        host nvarchar(32) null,
+        attributes nvarchar(max) null,
+        target nvarchar(128) null,
+        target_type nvarchar(128) null,
+        monitoring_statistic nvarchar(32) null,
+        primary key (id)
+    );
+GO
+
+alter table identityiq.spt_server_statistic
+        add constraint FKD8C394DC9755032B
+        foreign key (host)
+        references identityiq.spt_server;
+GO
+
+alter table identityiq.spt_server_statistic
+        add constraint FKD8C394DCAAD6EDC1
+        foreign key (monitoring_statistic)
+        references identityiq.spt_monitoring_statistic;
+GO
+
+create index FKD8C394DC9755032B on identityiq.spt_server_statistic (host);
+GO
+
+create index server_stat_snapshot on identityiq.spt_server_statistic (snapshot_name);
+GO
+
+create index FKD8C394DCAAD6EDC1 on identityiq.spt_server_statistic (monitoring_statistic);
+GO
+
+alter table identityiq.spt_server add extended1 nvarchar(255) null;
+GO
+create index spt_server_extended1_ci on identityiq.spt_server (extended1);
+GO
+
+
+-- End Environmental Monitoring
+
+-- Request reliability
+
+create table identityiq.spt_request_state (
+        id nvarchar(32) not null,
+        created numeric(19,0) null,
+        modified numeric(19,0) null,
+        name nvarchar(450) null,
+        attributes nvarchar(max) null,
+        request_id nvarchar(32) null,
+        primary key (id)
+    );
+GO
+
+alter table identityiq.spt_request_state
+        add constraint FKDCED76591A9F1D1A
+        foreign key (request_id)
+        references identityiq.spt_request;
+GO
+
+create index FKDCED76591A9F1D1A on identityiq.spt_request_state (request_id);
+GO
+
+-- End Request reliability
+
+-- Add lock to WorkflowCase
+alter table identityiq.spt_workflow_case add iiqLock nvarchar(128);
+GO
+
+-- Pending Certification reference
+
+alter table identityiq.spt_certification_entity add pending_certification nvarchar(32) null;
+GO
+create index spt_cert_entity_pending on identityiq.spt_certification_entity (pending_certification);
+GO
+
+-- Add selfCertificationReassignment column
+alter table identityiq.spt_certification add self_cert_reassignment tinyint null default 0 with values;
+GO
+
+-- Add attributes to RemediationItem
+alter table identityiq.spt_remediation_item add attributes nvarchar(max) null;
+GO
+
+-- Add Identity.type column
+alter table identityiq.spt_identity add type nvarchar(128) null;
+GO
+create index spt_identity_type_ci on identityiq.spt_identity (type);
+GO
+
+alter table identityiq.spt_identity add software_version nvarchar(128) null;
+GO
+alter table identityiq.spt_identity add administrator nvarchar(32) null;
+GO
+create index spt_identity_sw_version_ci on identityiq.spt_identity (software_version);
+GO
+alter table identityiq.spt_identity 
+	add constraint FK47706246DD2B81CB
+	foreign key (administrator)
+	references identityiq.spt_identity;
+GO
+create index FK47706246DD2B81CB on identityiq.spt_identity (administrator);
+GO
+
+
+create index spt_cert_item_att_name_ci on identityiq.spt_certification_item (exception_attribute_name);
+GO
+create index spt_certification_item_tdn_ci on identityiq.spt_certification_item (target_display_name);
+GO
+
+--
+-- This is necessary to maintain the schema version. DO NOT REMOVE.
+--
+update identityiq.spt_database_version set schema_version='7.3-11' where name='main';
+GO

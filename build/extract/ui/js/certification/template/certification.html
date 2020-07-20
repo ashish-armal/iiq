@@ -1,0 +1,530 @@
+<div class="certification decision-page" sp-loading-mask="ctrl.getCertification()">
+  <section>
+    <!-- this div is necessary for jaws to read the notification -->
+    <div id="notificationDiv" class="sr-only" role="alert" aria-live="assertive"></div>
+    <sp-notification sp-triggerable="true"/>
+  </section>
+  <div sp-if-size="sm md lg">
+    <!-- Header -->
+    <section class="container-fluid bg-white b-b">
+      <div class="row m-t-sm m-b-sm">
+        <div class="decision-page-title" ng-class="{ 'col-xs-7' : ctrl.showDateField(), 'col-xs-10' : !ctrl.showDateField() }">
+          <button id="certBackBtn" role="button" type="button" aria-label="{{'ui_cert_go_back' | spTranslate}}" class="btn btn-white btn-sm m-r-sm" 
+            title="{{ 'ui_cert_go_back' | spTranslate }}" ng-click="ctrl.goBack()">
+            <i class="fa fa-chevron-left" role="presentation"></i>
+          </button>
+
+          <h1 class="inline decision-page-title-text v-middle text-ellipsis">
+            {{ ctrl.getCertification().name }}
+          </h1>
+        </div>
+
+        <div class="text-right" ng-class="{ 'col-xs-5' : ctrl.showDateField(), 'col-xs-2' : !ctrl.showDateField() }">
+          <p class="inline h4 m-t-xs m-b m-r-sm text-info" ng-if="ctrl.showDateField()">
+            <span class="text-muted font-thin">
+              <span ng-if="ctrl.showExpirationDate()" class="cert-due-date">
+                <sp-due-date sp-due-date="ctrl.getCertification().expiration" sp-max-days-until-due="14"/>
+              </span>
+              <span ng-if="ctrl.isSignedOff()">
+                {{ 'certification_signed_on' | spTranslate}} {{ ctrl.getCertification().signoffs[0].date | spDate:'shortDate'}}
+              </span>
+            </span>
+          </p>
+          <a id="csvDownloadLink" ng-href="{{ ctrl.getExportCSVLink() }}" ng-click="ctrl.downloadCSV()" aria-label="{{'ui_cert_export_csv' | spTranslate}}" class="btn btn-white btn-sm">
+            <i class="fa fa-download fa-lg" role="presentation"></i>
+          </a>
+          <button id="certInfoBtn" role="button" type="button" aria-label="{{'ui_cert_more_info' | spTranslate}}" class="btn btn-white btn-sm m-l-xs pull-right"
+                  title="{{ 'ui_cert_more_info' | spTranslate }}" ng-click="ctrl.openDetailDialog()">
+            <i class="fa fa-info-circle fa-lg" role="presentation"></i>
+          </button>
+        </div>
+      </div>
+      <sp-refresh-warning sp-ignore-warning="!ctrl.isSaveButtonEnabled() || ctrl.isExportingCSV()"/>
+    </section>
+
+    <!-- Entity List -->
+    <div class="pull-left" ng-if="ctrl.isEntityListDisplayed()">
+      <sp-certification-entity-list sp-state="ctrl.getEntityListState()"
+                                    sp-refresh-trigger="ctrl.entityListRefreshTrigger"
+                                    sp-config="ctrl.entityListConfig"
+                                    sp-match-height-element=".entity-list-tabs">
+      </sp-certification-entity-list>
+    </div>
+
+    <section class="entity-list-tabs container-fluid clear">
+      <!-- Tabs -->
+      <section class="container-fluid bg-white">
+        <div class="m-l-n-xlg m-r-n-xlg">
+          <div class="col-xs-12">
+
+            <!-- Entity List Button -->
+            <button id="certEntityBtn"
+                    ng-click="ctrl.toggleEntityList()"
+                    type="button"
+                    aria-label="{{ !ctrl.isEntityListDisplayed() ? 'ui_508_show' : 'ui_508_hide' | spTranslate }} {{'ui_entity_list_view' | spTranslate}}"
+                    class="btn btn-sm btn-white pull-left icon-btn m-t-sm m-r"
+                    ng-if="ctrl.hasEntityListView()">
+              <i class="fa fa-list fa-lg" role="presentation"></i>
+              <span class="hidden-xs hidden-sm">{{ 'ui_cert_entity_list_button' | spTranslate }}</span>
+              <i class="fa" role="presentation"
+                 ng-class="{ 'fa-chevron-left' : ctrl.isEntityListDisplayed(), 'fa-chevron-right' : !ctrl.isEntityListDisplayed() }"></i>
+            </button>
+
+            <!-- Tabs -->
+            <ul class="nav decision-page-tabs m-l-n m-r-n bg-white" role="tablist">
+              <li ng-repeat="tab in ctrl.getTabs()"
+                  ng-if="!tab.isHidden()"
+                  role="presentation"
+                  ng-class="{ 'active': ctrl.getCurrentTab() === tab.name,
+                              'tab-entity-list-displayed': ctrl.isEntityListDisplayed(),
+                              'tab-detail-view': ctrl.getEntity(),
+                              'tab-worksheet-view': !ctrl.getEntity() }">
+                <button class="btn b-b" role="tab" ng-click="ctrl.changeTab(tab.name)" aria-selected="{{ ctrl.getCurrentTab() === tab.name }}">
+                  <span class="text-nowrap">
+                    {{ tab.title | spTranslate }}
+                    <span class="label" ng-if="tab.showCount">
+                      {{ ctrl.getTabCount(tab) }}
+                    </span>
+                  </span>
+                  <span ng-if="ctrl.getCurrentTab() === tab.name" class="sr-only">{{'ui_access_selected' | spTranslate}}</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="cert-container-fluid">
+        <div ng-if="ctrl.isEntityDetailTabSelected()" class="tab-content-bg rich-text word-break">
+            <div ng-if="ctrl.getEntity().type === 'Identity'">
+              <!-- No results message -->
+              <div class="text-center" ng-if="!ctrl.getEntity().identityAttributes">
+                <p class="h3 text-muted">
+                  {{'ui_cert_tab_no_employee_data_available' | spTranslate}}
+                </p>
+              </div>
+
+              <div class="row" ng-if="ctrl.getEntity().identityAttributes">
+                <div class="col-sm-6">
+                  <div class="panel m-t">
+                    <div class="panel-heading">
+                      <div class="row">
+                        <div class="col-xs-12">
+                          <h4>{{ 'ui_cert_tab_employee_data' | spTranslate }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                    <sp-identity-attributes sp-identity="ctrl.getEntity().identityAttributes"></sp-identity-attributes>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <sp-scorecard sp-scorecard="ctrl.getEntity().scorecard"></sp-scorecard>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-12">
+                  <sp-certification-differences sp-differences="ctrl.getEntity().differences"></sp-certification-differences>
+                </div>
+              </div>
+            </div>
+
+            <div ng-if="ctrl.getEntity().type === 'DataOwner' || ctrl.getEntity().type === 'AccountGroup'">
+              <div sp-loading-mask="ctrl.hasLoadedManagedAttributeDetails()">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="panel m-t">
+                      <div class="panel-heading">
+                        <div class="row">
+                          <div class="col-xs-12">
+                            <h4>{{ 'ui_cert_detail_eo_standard_props' | spTranslate }}</h4>
+                            <sp-managed-attribute-standard-props
+                              sp-managed-attribute="ctrl.managedAttributeDetails">
+                            </sp-managed-attribute-standard-props>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="panel m-t">
+                      <div class="panel-heading">
+                        <div class="row">
+                          <div class="col-xs-12">
+                            <h4>{{ 'ui_cert_detail_eo_object_props' | spTranslate }}</h4>
+                            <sp-managed-attribute-object-props
+                              sp-managed-attribute="ctrl.managedAttributeDetails">
+                            </sp-managed-attribute-object-props>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div ng-if="ctrl.managedAttributeDetails.hasMembers">
+                      <div class="panel m-t">
+                        <div class="panel-heading">
+                          <div class="row">
+                            <div class="col-xs-12">
+                              <h4>{{ 'ui_cert_detail_eo_members' | spTranslate }}</h4>
+                              <sp-managed-attribute-members
+                                sp-managed-attribute="ctrl.managedAttributeDetails"
+                                sp-managed-attribute-resource-url="ctrl.getManagedAttributeBaseUrl()">
+                              </sp-managed-attribute-members>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div ng-if="ctrl.managedAttributeDetails.hasAccess">
+                      <div class="panel m-t">
+                        <div class="panel-heading">
+                          <div class="row">
+                            <div class="col-xs-12">
+                              <h4>{{ 'ui_cert_detail_eo_access' | spTranslate }}</h4>
+                              <sp-managed-attribute-access
+                                sp-managed-attribute="ctrl.managedAttributeDetails"
+                                sp-managed-attribute-resource-url="ctrl.getManagedAttributeBaseUrl()">
+                              </sp-managed-attribute-access>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div ng-if="ctrl.managedAttributeDetails.hasInheritance">
+                      <div class="panel m-t">
+                        <div class="panel-heading">
+                          <div>
+                            <div class="col-xs-12">
+                              <h4>{{ 'ui_cert_detail_eo_inheritance' | spTranslate }}</h4>
+                            </div>
+                            <sp-managed-attribute-inheritance
+                              sp-managed-attribute="ctrl.managedAttributeDetails"
+                              sp-managed-attribute-resource-url="ctrl.getManagedAttributeBaseUrl()">
+                            </sp-managed-attribute-inheritance>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div ng-if="ctrl.getEntity().type === 'BusinessRole'">
+              <div sp-loading-mask="ctrl.hasLoadedRoleSnapshot()">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="panel m-t">
+                      <div class="panel-heading">
+                        <div class="row">
+                          <div class="col-xs-12">
+                            <h4>{{ 'ui_cert_detail_eo_role_details' | spTranslate }}</h4>
+                            <sp-role-snapshot-detail sp-role-snapshot="ctrl.roleSnapshot"></sp-role-snapshot-detail>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="row tab-content-bg m-b-xlg">
+          <div class="col-xs-12">
+            <div ng-if="ctrl.warnings"
+                 class="alert alert-warning m-t"
+                 ng-repeat="warning in ctrl.warnings">
+              <p class="alert-title" role="alert">
+                <i class="fa fa-exclamation-triangle" role="presentation"></i> <b>{{warning | spTranslate}}</b>
+              </p>
+            </div>
+
+            <div class="m-t" ng-repeat="table in ctrl.getCurrentTabConfig().tables" ng-if="ctrl.isTableDisplayed(table)">
+              <div id = "{{ table.getTableId() }}">
+                <sp-data-table sp-items-func="ctrl.getItems(table, startIdx, itemsPerPage, filterValues, sortOrder, groupBy)"
+                               sp-drop-down-fit="{{ table.getDropDownContainer() }}"
+                               sp-clear-selections-on-search="true"
+                               sp-table-config="table.getDataTableConfig()"
+                               sp-aria-label="table.name">
+                  <sp-data-table-heading sp-position="top">
+                    <div ng-if="table.title" class="m-t">
+                      <h4>{{ table.title | spTranslate }}</h4>
+                    </div>
+                  </sp-data-table-heading>
+
+                  <sp-data-table-heading sp-position="left">
+                    <span ng-if="table.allowBulk">
+                      <sp-certification-bulk-decision-selector sp-certification="ctrl.getCertification()"
+                                                               sp-bulk-decisions="ctrl.getBulkDecisions()"
+                                                               sp-checkbox-multi-select="table.getDataTableConfig().getCheckboxMultiSelect()"
+                                                               sp-filter-values="table.getDataTableConfig().getSearchData().filterValues"
+                                                               sp-table="table">
+                      </sp-certification-bulk-decision-selector>
+                    </span>
+                  </sp-data-table-heading>
+                  <sp-data-table-heading sp-position="right" sp-priority="2">
+                    <span class="text-right" ng-if="ctrl.showRecommendationButton(table)">
+                      <button class="btn btn-xs rec-info-btn btn-white"
+                              id="recommendationExplanationModalBtn{{table.name}}"
+                              ng-click="ctrl.showRecommendationExplanationDialog()"
+                              aria-label="{{'ui_recommendations_cert_help' | spTranslate}}">
+                        <span class="m-r-n-xs">
+                          <span class="fa-stack fa-lg bounceIn rec-approve">
+                            <i class="fa fa-circle fa-stack-2x recommendation-yes-icon" role="presentation"></i>
+                            <i class="fa fa-thumbs-up fa-stack-1x text-white" role="presentation"></i>
+                          </span>
+                          <span class="fa-stack fa-lg bounceIn rec-deny recommend">
+                            <i class="fa fa-circle fa-stack-2x text-danger" role="presentation"></i>
+                            <i class="fa fa-thumbs-down fa-stack-1x text-white" role="presentation"></i>
+                          </span>
+                        </span>
+                        <span class="m-l-xs rec-text">{{'ui_recommendations' | spTranslate}}</span>
+                        <span class="small m-t-n-xxs">
+                          <i class="fa fa-question-circle fa-lg text-info" role="presentation"></i>
+                        </span>
+                      </button>
+                    </span>
+                  </sp-data-table-heading>
+                </sp-data-table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+    </span>
+  </div>
+
+  <!-- Mobile view - separated from desktop view because of significant differences in the page structure. -->
+  <div sp-if-size="xs" class="container-fluid certification-xs">
+
+    <!-- Mobile Header - Title, Search, Information Icon, etc... -->
+    <header>
+      <!-- Mobile Entity List Header -->
+      <div ng-if="ctrl.isMobileEntityListView()" class="row bg-white">
+        <div class="col-xs-10">
+          <h5 ng-if="!ctrl.isMobileEntitySearch()" class="v-middle inline m-t-sm font-bold text-ellipsis">
+            {{ ctrl.getCertification().name }}
+          </h5>
+          <div ng-if="ctrl.isMobileEntitySearch()" class="cert-header-search">
+              <input type="text"
+                     class="form-control"
+                     sp-auto-focus
+                     ng-model="ctrl.getMobileEntityListState().entitySearchTerm"
+                     ng-keypress="ctrl.mobileEntitySearch($event)"
+                     placeholder="{{ 'ui_cert_search_for_users_placeholder' | spTranslate }}" />
+          </div>
+        </div>
+        <div class="col-xs-2">
+          <div class="pull-right m-r-n text-nowrap">
+            <button id="mobileEntityClearSearchBn" class="btn btn-cert-header-xs" ng-if="ctrl.isMobileEntitySearch()" ng-click="ctrl.mobileEntitySearchClear()">
+              <i role="presentation" class="fa fa-times"></i>
+            </button>
+            <button id="mobileEntitySearchBtn" class="btn btn-cert-header-xs" ng-click="ctrl.mobileEntitySearch()">
+              <i role="presentation" class="fa fa-search"></i>
+            </button>
+            <button id="mobileCertDetailDialogBtn" class="btn btn-cert-header-xs" ng-click="ctrl.openDetailDialog()">
+              <i role="presentation" class="fa fa-info-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Detail View Header with Entity List View-->
+      <div ng-show="ctrl.hasUserView() && !ctrl.isMobileEntityListView()" class="row bg-white">
+        <div class="col-xs-2">
+          <div class="pull-left m-l-n text-nowrap">
+            <button id="gotoMobileEntityListBtn" class="btn btn-cert-header-xs" ng-click="ctrl.gotoMobileEntityListView()">
+              <i role="presentation" class="fa fa-list"></i>
+            </button>
+            <button id="gotoPreviousEntityBtn"
+                    ng-click="ctrl.gotoPreviousEntity()"
+                    ng-disabled="!ctrl.hasPreviousEntity()"
+                    class="btn btn-cert-header-xs">
+              <i role="presentation" class="fa fa-chevron-left"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-xs-8">
+          <h5 class="text-center v-middle inline m-t-sm font-bold text-ellipsis">
+            {{ ctrl.getEntity().displayableName }}
+          </h5>
+        </div>
+        <div class="col-xs-2">
+          <div class="pull-right m-r-n text-nowrap">
+            <button id="mobileEntityDetailDialogBtn" class="btn btn-cert-header-xs" ng-click="ctrl.showMobileEntityDetails()">
+              <i role="presentation" class="fa fa-info-circle"></i>
+            </button>
+            <button id="gotoNextEntityBtn"
+                    ng-click="ctrl.gotoNextEntity()"
+                    ng-disabled="!ctrl.hasNextEntity()"
+                    class="btn btn-cert-header-xs">
+              <i role="presentation" class="fa fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile Detail View Header without Entity List View-->
+      <div ng-show="!ctrl.hasUserView()" class="row bg-white">
+        <div class="col-xs-2">
+          <div class="pull-left m-l-n text-nowrap">
+          </div>
+        </div>
+        <div class="col-xs-8">
+          <h5 class="text-center v-middle inline m-t-sm font-bold text-ellipsis">
+            {{ ctrl.getCertification().name }}
+          </h5>
+        </div>
+        <div class="col-xs-2">
+          <div class="pull-right m-r-n text-nowrap">
+            <button id="mobileCertDetailDialogBtn" class="btn btn-cert-header-xs" ng-click="ctrl.openDetailDialog()">
+              <i role="presentation" class="fa fa-info-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile entity list tabs -->
+    <div ng-if="ctrl.hasUserView()" ng-show="ctrl.isMobileEntityListView()" class="m-l-n m-r-n mobile-m-b-xxlg">
+      <sp-tabset sp-active-tab-config="ctrl.getMobileEntityViewState().activeConfig">
+        <sp-tab sp-config="ctrl.getMobileEntityViewState().remainingEntityListConfig">
+          <uib-tab-heading>
+            <span>{{ 'ui_cert_users_left_tab' | spTranslate }}</span>
+            <span class="label label-info">{{ ctrl.getCertification().incompleteEntities }}</span>
+          </uib-tab-heading>
+          <sp-certification-entity-list sp-state="ctrl.getMobileEntityViewState().remainingEntityListState"
+                                        sp-refresh-trigger="ctrl.entityListRefreshTrigger"
+                                        sp-config="ctrl.getMobileEntityViewState().remainingEntityListConfig"
+                                        sp-use-entity-pager="true"
+                                        sp-show-item-status-counts="true">
+          </sp-certification-entity-list>
+        </sp-tab>
+        <sp-tab sp-config="ctrl.getMobileEntityViewState().completeEntityListConfig">
+          <uib-tab-heading>
+            <span>{{ 'ui_cert_users_complete_tab' | spTranslate }}</span>
+            <span class="label label-success">{{ ctrl.getCertification().completedEntities }}</span>
+          </uib-tab-heading>
+          <sp-certification-entity-list sp-state="ctrl.getMobileEntityViewState().completeEntityListState"
+                                        sp-refresh-trigger="ctrl.entityListRefreshTrigger"
+                                        sp-config="ctrl.getMobileEntityViewState().completeEntityListConfig"
+                                        sp-use-entity-pager="true">
+          </sp-certification-entity-list>
+        </sp-tab>
+      </sp-tabset>
+    </div>
+
+    <!-- Mobile Detail View -->
+    <div ng-if="!ctrl.isMobileEntityListView()">
+
+      <!-- Mobile detail view tabs -->
+      <div class="m-l-n m-r-n mobile-padding-btm">
+        <sp-tabset sp-active-tab-config="ctrl.getCertificationViewState().currentTabConfig">
+          <sp-tab ng-repeat="tab in ctrl.getTabs()" ng-if="!tab.isHidden()" sp-config="tab">
+            <uib-tab-heading>
+              <span>{{ tab.title | spTranslate }}</span>
+              <span ng-if="tab.showCount"
+                    class="label"
+                    ng-class="{ 'label-success': tab.name === 'Complete', 'label-info': tab.name !== 'Complete' }">
+                {{ ctrl.getTabCount(tab) }}
+              </span>
+            </uib-tab-heading>
+          </sp-tab>
+        </sp-tabset>
+
+        <!-- Warnings -->
+        <div ng-if="ctrl.warnings"
+             class="alert alert-warning m-t"
+             ng-repeat="warning in ctrl.warnings">
+          <p class="alert-title" role="alert">
+            <i class="fa fa-exclamation-triangle" role="presentation"></i> <b>{{warning | spTranslate}}</b>
+          </p>
+        </div>
+
+        <!-- Mobile View Cards -->
+        <div ng-if="!ctrl.isListViewTable(table.getTableId())" class="m-t mobile-m-b-xlg m-l m-r" ng-repeat="table in ctrl.getCurrentTabConfig().tables" ng-if="ctrl.isTableDisplayed(table)">
+          <div class="h4" ng-if="table.title">
+            {{ table.title | spTranslate }}
+          </div>
+
+          <sp-card-list sp-items-func="ctrl.getItems(table, startIdx, itemsPerPage, filterValues, sortOrder)"
+                        sp-config="table.getCardListConfig()">
+            <sp-card>
+              <sp-certification-item-card sp-item="item" sp-column-config-key="spColumnConfigKey"></sp-certification-item-card>
+            </sp-card>
+          </sp-card-list>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save and Clear buttons -->
+  <sp-footer-action-bar show-action-bar="ctrl.isSaveAndClearButtonsEnabled() || ctrl.isReadyForSignOff()">
+    <!-- Clear button -->
+    <button id="certClearButton"
+            class="btn btn-s-sm btn-white"
+            type="button"
+            ng-click="ctrl.clearDecisions()"
+            ng-if="ctrl.isClearButtonEnabled()">
+      <span>{{ 'ui_clear_decisions' | spTranslate }}</span>
+    </button>
+    <!-- Save Decisions button -->
+    <sp-certification-save-button ng-if="!ctrl.isComplete() && ctrl.isCertificationEditable()"
+                                  sp-enabled="ctrl.isSaveButtonEnabled()"
+                                  sp-decision-count="ctrl.getDecisionCount()"
+                                  sp-refresh-trigger="ctrl.entityListRefreshTrigger"
+                                  sp-save-func="ctrl.save()">
+    </sp-certification-save-button>
+    <!-- SignOff button -->
+    <button id="certSignOffBtn"
+            class="btn btn-lg m-t m-b m-r-n"
+            ng-class="{ 'btn-success' : !ctrl.getSignoffBlockedReason(), 'btn-danger' : !!ctrl.getSignoffBlockedReason() }"
+            type="button"
+            ng-click="ctrl.sign()"
+            ng-if="ctrl.isReadyForSignOff()">
+      <span>
+        <i class="fa fa-exclamation-triangle" role="presentation" ng-if="!!ctrl.getSignoffBlockedReason()"></i>
+          {{ 'ui_cert_signoff_decisions' | spTranslate }}
+        <span ng-if="!!ctrl.getSignoffBlockedReason()" class="sr-only">
+          {{ 'ui_cert_signoff_blocked_sr' | spTranslate }}
+        </span>
+      </span>
+    </button>
+  </sp-footer-action-bar>
+
+  <!-- Signoff overlay -->
+  <div id="signoffOverlay" role="dialog" class="overlay overlay-simplegenie open" ng-if="ctrl.visibleOverlay">
+    <button id="closeOverlayBtn"
+            type="button"
+            class="overlay-close text-default"
+            aria-label="{{ 'ui_close' | spTranslate }}"
+            ng-click="ctrl.closeOverlay()"
+            ng-keydown="ctrl.onQueryKeyDown($event)">
+      <i class="fa fa-times fa-3x" role="presentation"></i>
+    </button>
+    <br/><br/>
+    <div class="sign-off-container">
+      <div class="h1 text-center">
+        <strong>{{ 'ui_sign_off_overlay_header' | translate}}</strong>
+      </div>
+      <div class="container sign-off-message text-center">
+        <div class="h4" ng-bind-html="'ui_inst_sign_off_msg' | spTranslate"></div>
+      </div>
+      <div class="text-center sign-off-btn-container">
+        <button id="certSignOffOverlayBtn" 
+                class="btn btn-success btn-lg m-t" 
+                ng-click="ctrl.signOff()" 
+                ng-keydown="ctrl.onQueryKeyDown($event)">
+          {{ 'ui_cert_signoff_decisions' | spTranslate }}
+        </button>
+        <a id="certReviewDecisionsBtn" 
+           href="" 
+           class="text-info block m-t h5 review" 
+           ng-click="ctrl.closeOverlay()" 
+           ng-keydown="ctrl.onQueryKeyDown($event)">
+          {{ 'ui_cert_review_decisions' | spTranslate }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

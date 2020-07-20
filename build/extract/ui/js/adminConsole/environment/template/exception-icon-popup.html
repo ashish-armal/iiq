@@ -1,0 +1,10 @@
+<!--
+  ~ /* (c) Copyright 2019 SailPoint Technologies, Inc., All Rights Reserved. */
+  -->
+<div id="hostStatusExceptionPopup-{{hostStatusComboCtrl.getId()}}">
+  <h4 class="font-bold" id="hostStatusPopupTitle-{{hostStatusComboCtrl.getId()}}">
+    <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+    {{'ui_env_mon_status_popup_title' | spTranslate}}
+  </h4>
+  {{hostStatusComboCtrl.getExceptionMessage()}}
+</div>

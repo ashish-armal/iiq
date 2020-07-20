@@ -1,0 +1,164 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+
+-- Environmental Monitoring
+create table identityiq.spt_monitoring_statistic (
+        id varchar2(32 char) not null,
+        created number(19,0),
+        modified number(19,0),
+        owner varchar2(32 char),
+        assigned_scope varchar2(32 char),
+        assigned_scope_path varchar2(450 char),
+        name varchar2(128 char) not null unique,
+        display_name varchar2(128 char),
+        description varchar2(1024 char),
+        value varchar2(4000 char),
+        value_type varchar2(128 char),
+        type varchar2(128 char),
+        attributes clob,
+        template number(1,0),
+        primary key (id)
+    );
+
+create table identityiq.spt_monitoring_statistic_tags (
+    statistic_id varchar2(32 char) not null,
+    elt varchar2(32 char) not null
+);
+
+alter table identityiq.spt_monitoring_statistic
+    add constraint FK9B2F43A1A5FB1B1
+    foreign key (owner)
+    references identityiq.spt_identity;
+
+create index identityiq.FK9B2F43A1A5FB1B1 on identityiq.spt_monitoring_statistic (owner);
+
+alter table identityiq.spt_monitoring_statistic
+    add constraint FK9B2F43A1486634B7
+    foreign key (assigned_scope)
+    references identityiq.spt_scope;
+
+create index identityiq.FK9B2F43A1486634B7 on identityiq.spt_monitoring_statistic (assigned_scope);
+
+alter table identityiq.spt_monitoring_statistic_tags
+    add constraint FK770FC5F7E6181207
+    foreign key (elt)
+    references identityiq.spt_tag;
+
+create index identityiq.FK770FC5F7E6181207 on identityiq.spt_monitoring_statistic_tags (elt);
+
+alter table identityiq.spt_monitoring_statistic_tags
+    add constraint FK770FC5F7315E4612
+    foreign key (statistic_id)
+    references identityiq.spt_monitoring_statistic;
+
+create index identityiq.FK770FC5F7315E4612 on identityiq.spt_monitoring_statistic_tags (statistic_id);
+
+create index identityiq.SPT_IDXF89E6D4D93CDB0EE on identityiq.spt_monitoring_statistic (assigned_scope_path);
+
+create index identityiq.spt_monitoring_statistic_name on identityiq.spt_monitoring_statistic (upper(name));
+
+create table identityiq.spt_server_statistic (
+        id varchar2(32 char) not null,
+        created number(19,0),
+        modified number(19,0),
+        name varchar2(128 char) not null,
+        snapshot_name varchar2(128 char),
+        value varchar2(4000 char),
+        value_type varchar2(128 char),
+        host varchar2(32 char),
+        attributes clob,
+        target varchar2(128 char),
+        target_type varchar2(128 char),
+        monitoring_statistic varchar2(32 char),
+        primary key (id)
+    );
+
+alter table identityiq.spt_server_statistic
+        add constraint FKD8C394DC9755032B
+        foreign key (host)
+        references identityiq.spt_server;
+
+create index identityiq.FKD8C394DC9755032B on identityiq.spt_server_statistic (host);
+
+create index identityiq.spt_server_statistic_name on identityiq.spt_server_statistic (upper(name));
+
+create index identityiq.server_stat_snapshot on identityiq.spt_server_statistic (snapshot_name);
+
+alter table identityiq.spt_server_statistic
+    add constraint FKD8C394DCAAD6EDC1
+    foreign key (monitoring_statistic)
+    references identityiq.spt_monitoring_statistic;
+
+create index identityiq.FKD8C394DCAAD6EDC1 on identityiq.spt_server_statistic (monitoring_statistic);
+
+alter table identityiq.spt_server add extended1 varchar2(255 char);
+create index identityiq.spt_server_extended1_ci on identityiq.spt_server (upper(extended1));
+
+-- End Environmental Monitoring
+
+-- Request reliability
+
+create table identityiq.spt_request_state (
+        id varchar2(32 char) not null,
+        created number(19,0),
+        modified number(19,0),
+        name varchar2(450 char),
+        attributes clob,
+        request_id varchar2(32 char),
+        primary key (id)
+    );
+
+alter table identityiq.spt_request_state
+        add constraint FKDCED76591A9F1D1A
+        foreign key (request_id)
+        references identityiq.spt_request;
+
+create index identityiq.FKDCED76591A9F1D1A on identityiq.spt_request_state (request_id);
+
+-- End Request reliability
+
+-- Add lock to WorkflowCase
+alter table identityiq.spt_workflow_case add iiqLock varchar2(128);
+
+-- Pending Certification reference
+
+alter table identityiq.spt_certification_entity add pending_certification varchar2(32 char);
+create index identityiq.spt_cert_entity_pending on identityiq.spt_certification_entity (pending_certification);
+
+-- Add selfCertificationReassignment column
+alter table identityiq.spt_certification add self_cert_reassignment number(1,0) default 0 not null;
+
+-- Add Identity.type column
+alter table identityiq.spt_identity add type varchar2(128 char);
+create index identityiq.spt_identity_type_ci on identityiq.spt_identity (upper(type));
+
+alter table identityiq.spt_identity add software_version varchar2(128 char);
+create index identityiq.spt_identity_sw_version_ci on identityiq.spt_identity (upper(software_version));
+
+alter table identityiq.spt_identity add administrator varchar2(32 char);
+alter table identityiq.spt_identity 
+	add constraint FK47706246DD2B81CB
+	foreign key (administrator)
+	references identityiq.spt_identity;
+create index identityiq.FK47706246DD2B81CB on identityiq.spt_identity (administrator);
+
+-- Drop case-sensitive CertificationItem.targetDisplayName index, and recreate as case-insensitive.
+drop index identityiq.spt_certification_item_tdn;
+create index identityiq.spt_certification_item_tdn_ci on identityiq.spt_certification_item (upper(target_display_name));
+
+-- Drop case-sensitive CertificationItem.exceptionAttributeName index, and recreate as case-insensitive.
+drop index identityiq.spt_cert_item_att_name;
+create index identityiq.spt_cert_item_att_name_ci on identityiq.spt_certification_item (upper(exception_attribute_name));
+
+-- Add attributes to RemediationItem
+alter table identityiq.spt_remediation_item add attributes clob;
+
+--
+-- This is necessary to maintain the schema version. DO NOT REMOVE.
+--
+update identityiq.spt_database_version set schema_version = '7.3-11' where name = 'main';
+
+commit;
