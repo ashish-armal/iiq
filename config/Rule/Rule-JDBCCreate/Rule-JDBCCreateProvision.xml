@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" modified="1594582849036" name="JDBCCreate" type="JDBCOperationProvisioning">
+  <Description>This rule is used by the JDBC connector to do provisioning of the data .</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>The application whose data file is being processed.</Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>The Schema currently in use.</Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>A connection object to connect to database.</Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>The ProvisioningPlan created against the JDBC application.</Description>
+      </Argument>
+      <Argument name="request">
+        <Description>The ProvisioningRequest created against the JDBC application.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>A Provisioning Result object is desirable to return the status.IT can be a new object or part of  Provisioning Plan</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+  log.error("Rule called = "+plan.toXml());
+  
+  import sailpoint.object.ProvisioningResult;
+  import sailpoint.object.Identity;
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import java.sql.Connection;
+  import java.sql.DriverManager;
+  import java.sql.PreparedStatement;
+  import java.sql.SQLException;
+  import org.apache.log4j.Logger;
+  import org.apache.log4j.Level;
+
+  //Logger log = Logger.getLogger("sailpoint.aa.rule");
+  ProvisioningResult result = new ProvisioningResult();
+  List accountRequests = plan.getAccountRequests();
+  
+  for (Object ar : accountRequests ) {
+    if (AccountRequest.Operation.Create.equals(ar.getOperation())) {
+      try {
+        String jdbcUrl = "jdbc:mysql://localhost/Emp";
+        String username = "root";
+        String password = "root";
+
+		List subList = ar.getAttributeRequest("Subject").getValue();
+		log.error("subList - "+subList);
+		
+		for (Object sub: subList) {
+		
+			log.error("SUB - "+sub);
+			String sql = "insert into employee values(?,?,?,?,?,?,?,?)";
+
+	        Connection conn = DriverManager.getConnection(jdbcUrl, username, password); 
+	        PreparedStatement stmt = conn.prepareStatement(sql); 
+	        stmt.setString(1, ar.getAttributeRequest("EmployeeID").getValue().toString());
+	        stmt.setString(2, ar.getAttributeRequest("FirstName").getValue().toString());
+	        stmt.setString(3, ar.getAttributeRequest("LastName").getValue().toString());
+	        stmt.setString(4, ar.getAttributeRequest("Email").getValue().toString());
+	        stmt.setString(5, ar.getAttributeRequest("AddressLine").getValue().toString());
+	        stmt.setString(6, ar.getAttributeRequest("City").getValue().toString());
+	        stmt.setString(7, ar.getAttributeRequest("Status").getValue().toString());
+	        stmt.setString(8, sub);
+	
+	        stmt.executeUpdate();
+	        log.error("Database updated successfully ");
+		}
+        
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+
+  return result;
+  </Source>
+</Rule>

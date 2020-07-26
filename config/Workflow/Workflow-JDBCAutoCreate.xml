@@ -136,7 +136,7 @@
         import sailpoint.api.Provisioner;
         import sailpoint.connector;
 
-        log.error("Executing JDBC Joiner Provision");
+        log.error("Building provisioning plan...");
 
         ProvisioningPlan plan = new ProvisioningPlan();
         
@@ -163,63 +163,19 @@
         acctReq.add(new AttributeRequest("City",Operation.Set,l.getAttribute("City")));
         acctReq.add(new AttributeRequest("Status",Operation.Set,"5"));
 
+		List subjectList = new ArrayList();
+		subjectList.add("Java");
+		subjectList.add(".Net");
+		acctReq.add(new AttributeRequest("Subject",Operation.Set,subjectList));
+		
         plan.add(acctReq);
         }
         }
-
+		log.error("Built provisioning plan - "+plan.toXml());
         return plan;
-
-        log.error("End JDBC Joiner Provision");
       </Source>
     </Script>
     <Transition to="Initialize"/>
-  </Step>
-  <Step action="call:compileProvisioningProject" icon="Task" name="Compile Project" posX="251" posY="124" resultVariable="project">
-    <Arg name="requester" value="ref:launcher"/>
-    <Arg name="identityName" value="ref:identityName"/>
-    <Arg name="noLocking">
-      <Script>
-        <Source>
-            boolean noLocking = false;
-            if ("Lifecycle".equals(flow)) {
-               noLocking = true;
-            }
-            return noLocking;
-        </Source>
-      </Script>
-    </Arg>
-    <Arg name="noApplicationTemplates">
-      <Script>
-        <Source>
-            boolean ignoreForms = false;
-            if ("ForgotPassword".equals(flow) || "ExpirePassword".equals(flow)) {
-               ignoreForms = true;
-            }
-            return ignoreForms;
-        </Source>
-      </Script>
-    </Arg>
-    <Arg name="source" value="ref:source"/>
-    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
-    <Arg name="plan" value="ref:plan"/>
-    <Arg name="flow" value="ref:flow"/>
-    <Arg name="disableRetryRequest" value="!ref:enableRetryRequest"/>
-    <Description>Compile the provisioning plan into a provisioning project.
-      If you need to pass in provisioner options like "noFiltering"
-      or "noRoleDeprovisioning" you must pass them as explicit
-      arguments to the call.
-
-      The evaluation options "requester" and "source" are commonly
-      set here.
-
-      You can also pass things into the Template and Field scripts by
-      defining Args in this step.</Description>
-    <Transition to="Build Approval Set" when="script:isNull(approvalSet)"/>
-  </Step>
-  <Step action="call:buildApprovalSet" condition="script:isNull(approvalSet)" name="Build Approval Set" posX="417" posY="119" resultVariable="approvalSet">
-    <Arg name="plan" value="ref:plan"/>
-    <Return name="approvalSet" to="approvalSet"/>
-    <Transition to=""/>
   </Step>
   <Step icon="Task" name="Initialize" posX="279" posY="9">
     <Arg name="formTemplate" value="Identity Update"/>
@@ -331,7 +287,7 @@
         Provisioner p = new Provisioner(context);
         if(plan.getIdentity() == null)
         plan.setIdentity(context.getObjectByName(Identity.class, identityName));
-        log.error("PPALN = "+plan.toXml());
+        log.error("Executing plan");
         p.execute(plan);
       </Source>
     </Script>
